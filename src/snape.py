@@ -28,6 +28,12 @@ shells: dict[str, ShellInfo] = {
         "source_alias": "alias snape='source {}'",
         "snape_shell_script": "snape.bash",
         "activate_file": "bin/activate"
+    },
+    "fish": {
+        "init_file": Path("~/.config/fish/config.fish"),
+        "source_alias": "function snape; source '{}' $argv; end",
+        "snape_shell_script": "snape.fish",
+        "activate_file": "bin/activate.fish"
     }
 }
 
@@ -52,8 +58,6 @@ VIRTUAL_ENV = os.getenv("VIRTUAL_ENV")
 
 # Load environment variables.
 # Their existence is ensured by the shell script.
-SNAPE_ENV = os.getenv("SNAPE_ENV")
-"The currently active snape environment."
 SNAPE_ROOT = os.getenv("SNAPE_ROOT")
 "The directory of all global snape environments."
 SNAPE_VENV = os.getenv("SNAPE_VENV")
@@ -62,7 +66,7 @@ SNAPE_LOCAL_VENV = os.getenv("SNAPE_LOCAL_VENV")
 "The name of local snape environments."
 
 # Apply environment variables
-SNAPE_DIR = Path(SNAPE_ROOT).expanduser()
+SNAPE_DIR = Path(SNAPE_ROOT).expanduser() if SNAPE_ROOT is not None else None
 "The directory of all global snape environments. If this is not a directory, the script will throw an error."
 
 def is_venv(env: Path) -> bool:
@@ -168,10 +172,6 @@ deactivate:
 environment variables:
     Snape manages its environments using the python-venv
     package inside the $SNAPE_ROOT directory (default: ~/.snape).
-    
-    The currently active environment is saved inside $SNAPE_ENV.
-    Please do NOT modify this variable to not confuse my dear
-    severus.
 
 local environments:
     By default, snape environments are created globally and can
@@ -272,7 +272,7 @@ def snape_setup_init(_: argparse.Namespace) -> None:
 
     # Write the alias
     with open(init_file, "a") as f:
-        f.writelines(source_alias)
+        f.writelines(['\n', source_alias])
 
     info("Initialized snape for", SHELL, "at", init_file)
 
@@ -389,7 +389,10 @@ def snape_status(argv: argparse.Namespace) -> None:
 
     # Construct information
     python_venv = VIRTUAL_ENV
-    snape_env = SNAPE_ENV
+    snape_env = VIRTUAL_ENV.split("/")[-1]
+    if snape_env != SNAPE_LOCAL_VENV and SNAPE_DIR not in Path(python_venv).parents:
+        # Neither local nor global snape managed environment
+        snape_env = None
     snape_dir = SNAPE_DIR
     snape_envs = [
         env
@@ -423,6 +426,7 @@ def snape_status(argv: argparse.Namespace) -> None:
     local_active_status = "\033[32m*\033[0m active" if local_active else "inactive"
     local_exists_status = "exists" if local_exists else "no venv found"
 
+    indent = '\n\t'
     print(
         f"""\
 Python venv:
@@ -431,7 +435,7 @@ Python venv:
 Global snape environments:
     Snape root:    {snape_dir}
     Available environments:
-        {'\n\t'.join(snape_envs_str)}
+        {indent.join(snape_envs_str)}
 
 Local snape environments:
     Name of local venvs: {local_default}
@@ -725,6 +729,8 @@ def main() -> None:
 
     if args.shell is not None:
         global SHELL
+        if args.shell not in shells:
+            error(1, "Unsupported shell:", args.shell)
         SHELL = args.shell
 
     if args.quiet:
