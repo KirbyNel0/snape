@@ -17,8 +17,8 @@ if [ -z "$SNAPE_LOCAL_VENV" ]; then
 	export SNAPE_LOCAL_VENV=".venv"
 fi
 
-SNAPE_PY=$(dirname "${BASH_SOURCE[0]}")/snape.py
-SNAPE_PY_CMD="help --help -h new delete list setup status"
+SNAPE_PY=$(dirname "${BASH_SOURCE[0]}")/../py/snape.py
+SNAPE_PY_CMD="help --help -h new touch delete rm list setup status possess"
 
 mkdir -p "$SNAPE_ROOT"
 

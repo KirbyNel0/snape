@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import argparse
 import os
 import shutil
@@ -16,7 +18,7 @@ ShellInfo = TypedDict("ShellInfo", {
     "init_file": Path,
     # The command which should be written to "init_file" to activate snape. {} is replaced by the "snape_file" value.
     "source_alias": str,
-    # A file name relative to "snape/src/" pointing to the shell script to execute
+    # A file name relative to "snape/sh/" pointing to the shell script to execute
     "snape_shell_script": str,
     # A file name relative to a virtual environment root pointing to the activation shell script
     "activate_file": str
@@ -66,8 +68,11 @@ SNAPE_LOCAL_VENV = os.getenv("SNAPE_LOCAL_VENV")
 "The name of local snape environments."
 
 # Apply environment variables
-SNAPE_DIR = Path(SNAPE_ROOT).expanduser() if SNAPE_ROOT is not None else None
+SNAPE_DIR = Path(SNAPE_ROOT).expanduser().resolve().absolute() if SNAPE_ROOT is not None else None
 "The directory of all global snape environments. If this is not a directory, the script will throw an error."
+
+# Save repo root
+SNAPE_REPO = Path(__file__).parent.parent.expanduser().resolve().absolute()
 
 def is_venv(env: Path) -> bool:
     """
@@ -78,6 +83,17 @@ def is_venv(env: Path) -> bool:
     :return: Whether the specified path contains an activation file and python binary.
     """
     return (env / shells[SHELL]["activate_file"]).is_file() and (env / "bin/python")
+
+
+def is_active_venv(env: Path) -> bool:
+    """
+    Checks whether the specified environment is the currently active python environment.
+
+    :param env: The path to check.
+    :return: Whether the specified environment is currently active.
+    """
+    return VIRTUAL_ENV is not None \
+        and Path(VIRTUAL_ENV).expanduser().resolve().absolute() == env.expanduser().resolve().absolute()
 
 
 def error(status: int, *message, **kwargs) -> None:
@@ -245,11 +261,9 @@ def snape_setup_init(_: argparse.Namespace) -> None:
 
     For argument documentation, see ``snape_setup_parser``.
     """
-    sources_root = Path(__file__).parent.expanduser().resolve().absolute()
-
     # Get shell-dependent arguments
     shell = shells[SHELL]
-    snape_shell_script: Path = sources_root / shell["snape_shell_script"]
+    snape_shell_script: Path = SNAPE_REPO / "sh" / shell["snape_shell_script"]
     init_file: Path = Path(shell["init_file"]).expanduser().resolve().absolute()
     source_alias: str = shell["source_alias"].format(snape_shell_script)
     # Only used by is_venv function: activate_file = shell["activate_file"]
@@ -286,11 +300,9 @@ def snape_setup_remove(argv: argparse.Namespace) -> None:
     root: bool = argv.root
     init: bool = argv.init
 
-    sources_root = Path(__file__).parent.expanduser().resolve().absolute()
-
     # Get shell-dependent arguments
     shell = shells[SHELL]
-    snape_shell_script: Path = sources_root / shell["snape_shell_script"]
+    snape_shell_script: Path = SNAPE_REPO / "sh" / shell["snape_shell_script"]
     init_file: Path = Path(shell["init_file"]).expanduser().resolve().absolute()
     source_alias: str = shell["source_alias"].format(snape_shell_script)
     # Only used by is_venv function: activate_file = shell["activate_file"]
@@ -333,7 +345,6 @@ def snape_setup_remove(argv: argparse.Namespace) -> None:
             info("Successfully removed snape from", SHELL)
 
 
-
 # The subcommand parser for ``snape setup``.
 snape_setup_parser = subcommands.add_parser(
     "setup",
@@ -367,8 +378,6 @@ snape_setup_remove_parser.add_argument(
 )
 snape_setup_remove_parser.set_defaults(func=snape_setup_remove)
 
-# snape_setup_parser.set_defaults(func=snape_setup)
-
 
 # ======================================== #
 # STATUS                                   #
@@ -389,8 +398,8 @@ def snape_status(argv: argparse.Namespace) -> None:
 
     # Construct information
     python_venv = VIRTUAL_ENV
-    snape_env = VIRTUAL_ENV.split("/")[-1]
-    if snape_env != SNAPE_LOCAL_VENV and SNAPE_DIR not in Path(python_venv).parents:
+    snape_env = VIRTUAL_ENV.split("/")[-1] if VIRTUAL_ENV else None
+    if snape_env and snape_env != SNAPE_LOCAL_VENV and SNAPE_DIR not in Path(python_venv).parents:
         # Neither local nor global snape managed environment
         snape_env = None
     snape_dir = SNAPE_DIR
@@ -505,6 +514,7 @@ snape_list_parser.set_defaults(func=snape_list)
 #    -u no_update: bool                    #
 #    -q requirements_quiet: bool           #
 #    -l here: bool                         #
+#    -o overwrite: bool                    #
 # ======================================== #
 
 
@@ -514,11 +524,12 @@ def snape_new(argv: argparse.Namespace):
 
     For argument documentation, see ``snape_new_parser``.
     """
-    env_name: str = argv.env
+    env_name: str | None = argv.env
     no_upgrade: bool = argv.no_update
-    requirements: str = argv.requirements
+    requirements: str | None = argv.requirements
     requirements_quiet: bool = argv.requirements_quiet
     here: bool = argv.here
+    overwrite: bool = argv.overwrite
 
     # The name of the new environment to create
     env_name: str
@@ -552,7 +563,7 @@ def snape_new(argv: argparse.Namespace):
             error(3, f"Directory '{SNAPE_VENV}' exists and is not a snape environment")
 
         # Ask whether an old venv should be overwritten
-        if not argv.overwrite:
+        if not overwrite:
             if not ask(f"Environment '{env_name}' does already exist. Overwrite?", default=False):
                 exit(1)
 
@@ -583,7 +594,7 @@ def snape_new(argv: argparse.Namespace):
 
 
 # The subcommand parser for ``snape new``.
-snape_new_parser = subcommands.add_parser("new", help="create a new environment")
+snape_new_parser = subcommands.add_parser("new", help="create a new environment", aliases=["touch"])
 # The name of the new environment
 snape_new_parser.add_argument(
     "env", nargs="?",
@@ -611,7 +622,7 @@ snape_new_parser.add_argument(
 # If specified with -r, the output of 'pip install -r' will not be printed
 snape_new_parser.add_argument(
     "-q", "--quiet",
-    help="prevent output from pip install when installing requirements",
+    help="hide output from pip when installing requirements",
     action="store_true", default=False, dest="requirements_quiet"
 )
 # If specified, a local environment will be created instead of a global one
@@ -628,8 +639,9 @@ snape_new_parser.set_defaults(func=snape_new)
 # DELETE                                   #
 # ---------------------------------------- #
 #    -f no_ask: bool                       #
-#    -i ignore_not_exists: bool            #
+#    -e ignore_not_exists: bool            #
 #    -l here: bool                         #
+#    -r ignore_active: bool                #
 # ======================================== #
 
 def snape_delete(argv: argparse.Namespace):
@@ -638,10 +650,11 @@ def snape_delete(argv: argparse.Namespace):
 
     For argument documentation, see ``snape_delete_parser``.
     """
-    env_name: str = argv.env
+    env_name: str | None = argv.env
     ignore_not_exists: bool = argv.ignore_not_exists
     here: bool = argv.here
     no_ask: bool = argv.no_ask
+    ignore_active: bool = argv.ignore_active
 
     if here:
         # Delete local environment
@@ -657,7 +670,7 @@ def snape_delete(argv: argparse.Namespace):
             error(3, "snape delete: No environment name provided")
         old_venv = SNAPE_DIR / env_name
 
-    log("Deleting environment at ")
+    log("Directory of old venv:", old_venv)
 
     # If the old_venv does not point to any directory, throw an error
     if not old_venv.is_dir():
@@ -669,8 +682,12 @@ def snape_delete(argv: argparse.Namespace):
     if not is_venv(old_venv):
         error(3, f"Not a python virtual environment:", old_venv)
 
+    # Check if the environment which should be deleted is currently active
+    if not ignore_active and is_active_venv(old_venv):
+        error(1, "The specified environment is currently active. Please deactivate it before deletion.")
+
     locality = "local" if here else "global"
-    if no_ask or ask(f"Are you sure you want to delete the {locality} environment {env_name}", False):
+    if no_ask or ask(f"Are you sure you want to delete the {locality} environment '{env_name}'?", False):
         # Remove everything
         shutil.rmtree(old_venv)
         if not old_venv.is_dir():
@@ -681,7 +698,7 @@ def snape_delete(argv: argparse.Namespace):
 
 
 # The subcommand parser for ``snape delete``.
-snape_delete_parser = subcommands.add_parser("delete", help="delete an existing environment")
+snape_delete_parser = subcommands.add_parser("delete", help="delete an existing environment", aliases=["rm"])
 # The name of the environment to delete
 snape_delete_parser.add_argument(
     "env", nargs="?",
@@ -696,7 +713,7 @@ snape_delete_parser.add_argument(
 )
 # Whether to ignore non-existing directories
 snape_delete_parser.add_argument(
-    "--i", "--ignore-not-exists",
+    "-e", "--ignore-not-exists",
     help="do not throw an error if the environment does not exist",
     action="store_true", default=False, dest="ignore_not_exists"
 )
@@ -707,8 +724,209 @@ snape_delete_parser.add_argument(
          "not allowed to provide 'env'.",
     action="store_true", default=False, dest="here"
 )
+# Continue if environment is currently active
+snape_delete_parser.add_argument(
+    "-r", "--ignore-active",
+    help="do not exit if the specified environment is currently active",
+    action="store_true", default=False, dest="ignore_active"
+)
 snape_delete_parser.set_defaults(func=snape_delete)
 
+# ======================================== #
+# POSSESS                                  #
+# ---------------------------------------- #
+#       env: str                           #
+#    -l here: bool                         #
+#    -n global_name: str                   #
+#    -r ignore_active: bool                #
+#    -a no_ask: bool                       #
+#    -o overwrite: bool                    #
+#    -d delete_old: bool                   #
+#    -q requirements_quiet: bool           #
+# ======================================== #
+
+
+def snape_possess(argv: argparse.Namespace) -> None:
+    """
+    Make an arbitrary virtual environment available to snape by copying its dependencies into a new environment
+    which is then managed by snape.
+
+    For argument documentation, see ``snape_possess_parser``.
+    """
+    env_name: str = argv.env
+    here: bool = argv.here
+    global_name: str | None = argv.global_name
+    ignore_active: bool = argv.ignore_active
+    no_ask: bool = argv.no_ask
+    overwrite: bool = argv.overwrite
+    delete_old: bool = argv.delete_old
+    requirements_quiet: bool = argv.requirements_quiet
+
+    old_venv = Path(env_name).expanduser().resolve().absolute()
+    log("Localizing environment:", old_venv)
+
+    # Check whether the original environment even exists
+    if not old_venv.is_dir():
+        error(1, "Not a directory:", env_name)
+
+    # Check whether the original environment is an environment
+    if not is_venv(old_venv):
+        error(1, "Not a python virtual environment:", env_name)
+
+    # Check whether the environment is located at snape root (is global environment)
+    if old_venv.parent == SNAPE_DIR:
+        log("Old environment is already known to snape")
+        info("Nothing to do")
+        exit(0)
+
+    # Validate the name for a new global environment. If not specified, the old name will be re-used.
+    if global_name is None:
+        global_name = old_venv.name
+    else:
+        if here:
+            error(1, "Local environment requested, global environment name specified. What should I do now, Potter?")
+        if global_name in FORBIDDEN_ENV_NAMES:
+            error(1, "Illegal environment name:", global_name)
+
+    # Global environments can have arbitrary names. Local environments must have the default local environment name.
+    if here:
+        new_venv = old_venv.parent / SNAPE_LOCAL_VENV
+    else:
+        new_venv = SNAPE_DIR / global_name
+
+    # Check whether the new environment is the same as the old one
+    # This can happen for local environments already having the correct name
+    if new_venv == old_venv:
+        log("New environment points to old name")
+        info("Nothing to do")
+        exit(0)
+
+    log("New name for venv:", new_venv)
+
+    if new_venv.is_dir():
+        # Check whether the directory for the new venv is a normal directory and throw an error if so
+        if not is_venv(new_venv):
+            error(3, f"Directory '{SNAPE_LOCAL_VENV}' exists and is not a snape environment")
+
+        # Ask whether an old venv should be overwritten
+        if not overwrite:
+            if not ask(f"Environment '{env_name}' does already exist. Overwrite?", default=False):
+                exit(1)
+
+    # If the environment is active, warn the user
+    if not ignore_active and is_active_venv(old_venv):
+        error(1, "The specified environment is currently active. Please deactivate it before this operation.")
+
+    # Read package list from old environment
+    try:
+        log("Fetching old packages (pip freeze)")
+        old_pip = subprocess.run([old_venv / "bin/pip", "freeze"], capture_output=True)
+    except subprocess.CalledProcessError as e:
+        log("Failed to fetch package list:", e)
+        old_pip = None
+
+    if not old_pip:
+        error(1, "Cannot read package list from", old_venv)
+
+    # Create package list
+    packages: list[str] = list(filter(lambda x: x, old_pip.stdout.decode().split("\n")))
+    log("Package list:", packages)
+    if old_pip.stderr:
+        log("ERRORS:", old_pip.stderr.decode())
+    if len(packages) == 0:
+        info(f"Note: No additional packages were installed in '{env_name}'")
+
+    # Create output and prompt
+    locality = "local" if here else "global"
+    question = f"Do you want to create a new {locality} environment named '{new_venv.name}' with the requirements of '{env_name}'?"
+    if not no_ask and not ask(question, default=True):
+        exit(1)
+
+    # Create environment
+    log("venv.create(...)")
+    info("Creating snape environment:", new_venv.name)
+    venv.create(new_venv, with_pip=True, upgrade_deps=True, clear=overwrite)
+    log("pip install")
+
+    # Install packages
+    if packages:
+        info("Installing dependencies")
+        new_pip = subprocess.run(
+            [new_venv / "bin/pip", "install"] + packages,
+            capture_output=requirements_quiet
+        )
+        # Output stdout
+        if new_pip.stdout:
+            log(new_pip.stdout.decode())
+        # Output errors
+        if new_pip.returncode != 0:
+            info("Could not install all requirements")
+            if new_pip.stderr:
+                log(new_pip.stderr.decode())
+
+    # Delete old environment
+    if delete_old:
+        info("Removing old environment")
+        shutil.rmtree(old_venv)
+        if old_venv.is_dir():
+            error(1, "Could not delete old environment")
+        else:
+            log("Successfully removed old environment")
+
+
+# The subcommand parser for ``snape possess``.
+snape_possess_parser = subcommands.add_parser(
+    "possess",
+    description="Make a local environment available to snape.\n"
+                "Snape will create a new environment it can manage and install all packages from the old venv into it.",
+    help="have snape take over a local environment"
+)
+# The name of the environment to manage
+snape_possess_parser.add_argument(
+    "env",
+    help="the name or path to the environment to make available to snape",
+    action="store"
+)
+# Whether to make the new environment a global one
+snape_possess_parser.add_argument(
+    "-l", "--local", "--here",
+    help="make the new environment local, not global",
+    action="store_true", default=False, dest="here"
+)
+# A new name for the new global environment
+snape_possess_parser.add_argument(
+    "-n", "--global-name",
+    help="give the new environment an other name. without this, it will have the same name as the old environment.",
+    action="store", default=None, dest="global_name", metavar="NAME"
+)
+# Continue if environment is currently active
+snape_possess_parser.add_argument(
+    "-i", "--ignore-active",
+    help="do not exit if the specified environment is currently active",
+    action="store_true", default=False, dest="ignore_active"
+)
+# Whether to prompt the user for existing venv
+snape_possess_parser.add_argument(
+    "-o", "--overwrite",
+    help="overwrite existing environments having the same name as the environment's new name",
+    action="store_true", default=False, dest="overwrite"
+)
+snape_possess_parser.add_argument(
+    "-a", "--no-ask",
+    help="do not prompt before creating the new environment",
+    action="store_true", default=False, dest="no_ask"
+)
+snape_possess_parser.add_argument(
+    "-q", "--quiet",
+    help="hide output from pip when installing requirements",
+    action="store_true", default=False, dest="requirements_quiet"
+)
+snape_possess_parser.add_argument(
+    "-d", "--delete-old",
+    help="delete the old environment after it has been copied successfully",
+    action="store_true", default=False, dest="delete_old"
+)
+snape_possess_parser.set_defaults(func=snape_possess)
 
 # ======================================== #
 # FINALIZE                                 #
@@ -749,7 +967,7 @@ def main() -> None:
             log("Informational output hidden")
         log("Enabled shell:", SHELL)
 
-    if args.func != snape_setup_init and not SNAPE_DIR.is_dir():
+    if args.func != snape_setup_init and SNAPE_DIR is not None and not SNAPE_DIR.is_dir():
         error(1, f"Snape root is not a valid directory ({SNAPE_DIR})")
 
     # Done preprocessing
