@@ -11,6 +11,11 @@ from typing import TypedDict
 
 import venv
 
+# ======================================== #
+# GLOBAL TYPES                             #
+# ======================================== #
+
+
 # Shell portability: Dicts of this type provide information on how to use snape with a given shell.
 # See ``snape setup``.
 ShellInfo = TypedDict("ShellInfo", {
@@ -23,6 +28,10 @@ ShellInfo = TypedDict("ShellInfo", {
     # A file name relative to a virtual environment root pointing to the activation shell script
     "activate_file": str
 })
+
+# ======================================== #
+# GLOBAL VARIABLES                         #
+# ======================================== #
 
 shells: dict[str, ShellInfo] = {
     "bash": {
@@ -51,6 +60,17 @@ If the user tries to create a venv named as any item of this list, an error is t
 The names of options and subcommands are added automatically.
 """
 
+# ======================================== #
+# UTILITY FUNCTIONS                        #
+# ======================================== #
+
+def absolute_path(path: Path | str) -> Path:
+    return Path(path).resolve().expanduser().absolute()
+
+# ======================================== #
+# ENVIRONMENT VARIABLES                    #
+# ======================================== #
+
 # Select the current shell as default.
 # This can be changed via command line option and is applied in ``__main__``.
 SHELL = os.getenv("SHELL").split("/")[-1]
@@ -68,11 +88,15 @@ SNAPE_LOCAL_VENV = os.getenv("SNAPE_LOCAL_VENV")
 "The name of local snape environments."
 
 # Apply environment variables
-SNAPE_DIR = Path(SNAPE_ROOT).expanduser().resolve().absolute() if SNAPE_ROOT is not None else None
+SNAPE_DIR = absolute_path(SNAPE_ROOT) if SNAPE_ROOT is not None else None
 "The directory of all global snape environments. If this is not a directory, the script will throw an error."
 
 # Save repo root
-SNAPE_REPO = Path(__file__).parent.parent.expanduser().resolve().absolute()
+SNAPE_REPO = absolute_path(__file__).parent.parent
+
+# ======================================== #
+# VENV FUNCTIONS                           #
+# ======================================== #
 
 def is_venv(env: Path) -> bool:
     """
@@ -95,6 +119,10 @@ def is_active_venv(env: Path) -> bool:
     return VIRTUAL_ENV is not None \
         and Path(VIRTUAL_ENV).expanduser().resolve().absolute() == env.expanduser().resolve().absolute()
 
+
+# ======================================== #
+# PRINT FUNCTIONS                          #
+# ======================================== #
 
 def error(status: int, *message, **kwargs) -> None:
     """
@@ -127,7 +155,7 @@ def info(*message, **kwargs) -> None:
     print(*message, **kwargs)
 
 
-def log(*message, **kwargs) -> None:
+def log(*_, **__) -> None:
     """
     Output debug log messages.
 
@@ -166,6 +194,10 @@ def ask(prompt: str, default: bool | None) -> bool:
         elif answer == "" and default is not None:
             return default
 
+
+# ======================================== #
+# ARGUMENT PARSER                          #
+# ======================================== #
 
 # The parser of the application.
 # For more information, see the ``subcommands`` object.
@@ -210,7 +242,7 @@ technical:
 parser.add_argument(
     "-s", "--shell",
     help=f"select a specific shell instead of the current shell (default: {SHELL})",
-    action="store", default=None, metavar="SHELL"
+    action="store", default=None, metavar="SHELL", choices=list(shells.keys())
 )
 parser.add_argument(
     "-q", "--quiet",
@@ -264,7 +296,7 @@ def snape_setup_init(_: argparse.Namespace) -> None:
     # Get shell-dependent arguments
     shell = shells[SHELL]
     snape_shell_script: Path = SNAPE_REPO / "sh" / shell["snape_shell_script"]
-    init_file: Path = Path(shell["init_file"]).expanduser().resolve().absolute()
+    init_file: Path = absolute_path(shell["init_file"])
     source_alias: str = shell["source_alias"].format(snape_shell_script)
     # Only used by is_venv function: activate_file = shell["activate_file"]
 
@@ -303,7 +335,7 @@ def snape_setup_remove(argv: argparse.Namespace) -> None:
     # Get shell-dependent arguments
     shell = shells[SHELL]
     snape_shell_script: Path = SNAPE_REPO / "sh" / shell["snape_shell_script"]
-    init_file: Path = Path(shell["init_file"]).expanduser().resolve().absolute()
+    init_file: Path = absolute_path(shell["init_file"])
     source_alias: str = shell["source_alias"].format(snape_shell_script)
     # Only used by is_venv function: activate_file = shell["activate_file"]
 
@@ -394,7 +426,7 @@ def snape_status(argv: argparse.Namespace) -> None:
     """
     raw: bool = argv.raw
 
-    local_venv = Path(SNAPE_LOCAL_VENV).expanduser().resolve().absolute()
+    local_venv = absolute_path(SNAPE_LOCAL_VENV)
 
     # Construct information
     python_venv = VIRTUAL_ENV
@@ -409,7 +441,7 @@ def snape_status(argv: argparse.Namespace) -> None:
         if is_venv(SNAPE_DIR / env)
     ]
     snape_default = SNAPE_VENV
-    local_active = False if python_venv is None else Path(python_venv).expanduser().resolve().absolute() == local_venv
+    local_active = False if python_venv is None else absolute_path(python_venv) == local_venv
     local_exists = bool(local_venv.is_dir() and is_venv(local_venv))
     local_default = SNAPE_LOCAL_VENV
 
@@ -762,7 +794,7 @@ def snape_possess(argv: argparse.Namespace) -> None:
     delete_old: bool = argv.delete_old
     requirements_quiet: bool = argv.requirements_quiet
 
-    old_venv = Path(env_name).expanduser().resolve().absolute()
+    old_venv = absolute_path(env_name)
     log("Localizing environment:", old_venv)
 
     # Check whether the original environment even exists
@@ -947,8 +979,6 @@ def main() -> None:
 
     if args.shell is not None:
         global SHELL
-        if args.shell not in shells:
-            error(1, "Unsupported shell:", args.shell)
         SHELL = args.shell
 
     if args.quiet:

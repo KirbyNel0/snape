@@ -2,16 +2,30 @@
 
 if test "$1" = "--help" -o "$1" = "-h"
 then
-	echo "usage: sh setup.sh"
-	echo
-	echo "  Sets up snape for the current shell"
-	echo "  After setup, restart your shell to use snape."
-	echo "  With snape setup, run 'snape setup' for further information."
-	echo
-	echo "arguments (only one at a time):"
-	echo "	-h, --help    show this help and exit"
-	echo "  -s, --shell   set up snape for the specified shell"
+	cat <<EOF
+usage: sh setup.sh"
+
+  Sets up snape for the current shell
+  After setup, restart your shell to use snape.
+  With snape setup, run 'snape setup' for further information.
+
+arguments (only one at a time):
+	-h, --help    show this help and exit
+  -s, --shell   set up snape for the specified shell
+EOF
 	exit 0
+fi
+
+if ! command -v /usr/bin/python3 >/dev/null
+then
+	echo "Python not found at /usr/bin/python3" >&2
+	exit 2
+fi
+
+if ! /usr/bin/python3 -c "import venv" >/dev/null
+then
+	echo "python-venv is not installed" >&2
+	exit 2
 fi
 
 if test "$1" = "--shell" -o "$1" = "-s"
