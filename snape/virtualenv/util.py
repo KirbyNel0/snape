@@ -2,7 +2,7 @@ import subprocess
 from pathlib import Path
 from typing import cast
 
-from snape.env_var import VIRTUAL_ENV, SHELL
+from snape import env_var
 from snape.config import SHELLS
 from snape.annotations import VirtualEnv
 from snape.util import absolute_path, log, info
@@ -25,7 +25,7 @@ def is_venv(env: Path) -> bool:
     :param env: The path to check.
     :return: Whether the specified path points to a directory which contains an activation file and a python binary.
     """
-    return env.is_dir() and (env / SHELLS[SHELL]["activate_file"]).is_file() and (env / "bin/python").is_file()
+    return env.is_dir() and (env / SHELLS[env_var.SHELL]["activate_file"]).is_file() and (env / "bin/python").is_file()
 
 
 def is_active_venv(env: VirtualEnv) -> bool:
@@ -35,7 +35,7 @@ def is_active_venv(env: VirtualEnv) -> bool:
     :param env: The path to check.
     :return: Whether the specified environment is currently active.
     """
-    return VIRTUAL_ENV is not None and absolute_path(VIRTUAL_ENV) == absolute_path(env)
+    return env_var.VIRTUAL_ENV is not None and absolute_path(env_var.VIRTUAL_ENV) == absolute_path(env)
 
 
 def ensure_venv(env: Path) -> VirtualEnv:

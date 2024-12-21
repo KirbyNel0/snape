@@ -7,4 +7,4 @@ __all__ = [
 
 
 def absolute_path(path: Path | str) -> Path:
-    return Path(path).resolve().expanduser().absolute()
+    return Path(path).expanduser().resolve().absolute()

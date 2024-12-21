@@ -11,18 +11,22 @@ usage: sh setup.sh"
 
 arguments (only one at a time):
 	-h, --help    show this help and exit
-  -s, --shell   set up snape for the specified shell
+  	-s, --shell   set up snape for the specified shell
 EOF
 	exit 0
 fi
 
-if ! command -v /usr/bin/python3 >/dev/null
+if [ -z "$SNAPE_PYTHON" ]; then
+	export SNAPE_PYTHON="/usr/bin/python3"
+fi
+
+if ! "$SNAPE_PYTHON" --version >/dev/null
 then
-	echo "Python not found at /usr/bin/python3" >&2
+	echo "Python not found at $SNAPE_PYTHON" >&2
 	exit 2
 fi
 
-if ! /usr/bin/python3 -c "import venv" >/dev/null
+if ! "$SNAPE_PYTHON" -c "import venv" >/dev/null
 then
 	echo "python-venv is not installed" >&2
 	exit 2
@@ -35,8 +39,8 @@ then
 		echo "No shell name provided ($1)" >&2
 		exit 2
 	fi
-	/usr/bin/python3 py/snape.py -s "$2" setup init
+	"$SNAPE_PYTHON" snape/run.py -s "$2" setup init
 	exit $?
 fi
 
-/usr/bin/python3 py/snape.py setup init
+"$SNAPE_PYTHON" snape/run.py setup init

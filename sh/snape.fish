@@ -5,6 +5,15 @@ if test $_ != snape; and test (type snape) != function
     exit 100
 end
 
+if [ -z "$SNAPE_PYTHON" ]
+	set -x SNAPE_PYTHON "/usr/bin/python3"
+end
+
+if ! "$SNAPE_PYTHON" -c "import venv" >/dev/null 2>&1
+	echo "Python installation or venv package not found" 1>&2
+	exit 2
+end
+
 if [ -z "$SNAPE_ROOT" ]
     set -x SNAPE_ROOT "$HOME/.snape"
 end
@@ -17,8 +26,8 @@ if [ -z "$SNAPE_LOCAL_VENV" ]
     set -x SNAPE_LOCAL_VENV .venv
 end
 
-set -l SNAPE_PY (realpath (dirname (status current-filename))/../snape/snape.py)
-set -l SNAPE_PY_CMD "help --help -h new touch delete rm list setup status possess"
+set -l SNAPE_SCRIPT (realpath (dirname (status current-filename))/../snape/run.py)
+set -l SNAPE_SCRIPT_CMD "help --help -h new touch delete rm list setup status possess"
 
 mkdir -p "$SNAPE_ROOT"
 
@@ -38,7 +47,7 @@ if [ (count $argv) -eq 0 ]
 	# Snape is inactive => activate default environment
     if ! [ -f "$SNAPE_ROOT/$SNAPE_VENV/bin/activate.fish" -a -f "$SNAPE_ROOT/$SNAPE_VENV/bin/python" ]
         # The default environment does not exist, create it
-        if ! /usr/bin/python3 "$SNAPE_PY" new "$SNAPE_VENV"
+        if ! /usr/bin/python3 "$SNAPE_SCRIPT" new "$SNAPE_VENV"
             exit 2
         end
     end
@@ -49,8 +58,8 @@ if [ (count $argv) -eq 0 ]
 end
 
 # This seems like a python problem
-if echo "$SNAPE_PY_CMD" | grep -wq -- "$argv[1]"
-    /usr/bin/python3 "$SNAPE_PY" $argv
+if echo "$SNAPE_SCRIPT_CMD" | grep -wq -- "$argv[1]"
+    /usr/bin/python3 "$SNAPE_SCRIPT" $argv
     exit $status
 end
 
@@ -93,4 +102,4 @@ end
 
 # This script cannot handle more than one argument,
 # anything else is passed to the python script
-/usr/bin/python3 "$SNAPE_PY" $argv
+/usr/bin/python3 "$SNAPE_SCRIPT" $argv

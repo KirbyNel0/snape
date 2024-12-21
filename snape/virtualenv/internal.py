@@ -4,9 +4,9 @@ import venv as python_venv
 from pathlib import Path
 from typing import cast
 
+from snape import env_var
 from snape.util import absolute_path, ask, log
 from snape.virtualenv import is_venv, is_active_venv
-from snape.env_var import SNAPE_DIR, SNAPE_LOCAL_VENV
 from snape.config import FORBIDDEN_ENV_NAMES
 from snape.annotations import VirtualEnv
 
@@ -27,7 +27,7 @@ def is_global_snape_venv(env: VirtualEnv | Path) -> bool:
     :param env: The environment to check.
     :return: Whether ``env`` is a child directory of ``SNAPE_DIR`` and is a virtual environment (see ``is_venv``).
     """
-    return env.parent == SNAPE_DIR and is_venv(env)
+    return env.parent == env_var.SNAPE_ROOT_PATH and is_venv(env)
 
 
 def get_snape_venv_path(name: str | None, local: bool) -> Path:
@@ -45,12 +45,12 @@ def get_snape_venv_path(name: str | None, local: bool) -> Path:
         raise NameError("Illegal snape venv name: ", name)
 
     if local:
-        return absolute_path(Path.cwd() / SNAPE_LOCAL_VENV)
+        return absolute_path(Path.cwd() / env_var.SNAPE_LOCAL_VENV)
 
     if name is None or len(name) == 0:
         raise ValueError("No name provided for global snape environment")
 
-    return absolute_path(SNAPE_DIR / name)
+    return absolute_path(env_var.SNAPE_ROOT_PATH / name)
 
 
 def create_new_snape_venv(env: Path, overwrite: bool | None, autoupdate: bool) -> VirtualEnv | None:
@@ -117,7 +117,7 @@ def get_global_snape_venvs() -> list[VirtualEnv]:
     :return: A list of absolute paths to all global snape environments.
     """
     return [
-        cast(VirtualEnv, SNAPE_DIR / snape_venv)
-        for snape_venv in os.listdir(SNAPE_DIR)
-        if is_venv(SNAPE_DIR / snape_venv)
+        cast(VirtualEnv, env_var.SNAPE_ROOT_PATH / snape_venv)
+        for snape_venv in os.listdir(env_var.SNAPE_ROOT_PATH)
+        if is_venv(env_var.SNAPE_ROOT_PATH / snape_venv)
     ]

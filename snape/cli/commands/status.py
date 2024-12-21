@@ -1,8 +1,7 @@
 import json
-import argparse
 from pathlib import Path
 
-from snape.env_var import SNAPE_LOCAL_VENV, VIRTUAL_ENV, SNAPE_DIR, SNAPE_VENV
+from snape import env_var
 from snape.util import log
 from snape.util import absolute_path
 from snape.cli import subcommands
@@ -18,20 +17,20 @@ def snape_status(
     For argument documentation, see ``snape_status_parser``.
     """
 
-    local_venv = absolute_path(SNAPE_LOCAL_VENV)
+    local_venv = absolute_path(env_var.SNAPE_LOCAL_VENV)
 
     # Construct information
-    python_venv = VIRTUAL_ENV
-    snape_env = VIRTUAL_ENV.split("/")[-1] if VIRTUAL_ENV else None
-    if snape_env and snape_env != SNAPE_LOCAL_VENV and SNAPE_DIR not in Path(python_venv).parents:
+    python_venv = env_var.VIRTUAL_ENV
+    snape_env = env_var.VIRTUAL_ENV.split("/")[-1] if env_var.VIRTUAL_ENV else None
+    if snape_env and snape_env != env_var.SNAPE_LOCAL_VENV and env_var.SNAPE_ROOT_PATH not in Path(python_venv).parents:
         # Neither local nor global snape managed environment
         snape_env = None
-    snape_dir = SNAPE_DIR
+    snape_dir = env_var.SNAPE_ROOT_PATH
     snape_envs = get_global_snape_venvs()
-    snape_default = SNAPE_VENV
+    snape_default = env_var.SNAPE_VENV
     local_active = False if python_venv is None else absolute_path(python_venv) == local_venv
     local_exists = bool(local_venv.is_dir() and is_venv(local_venv))
-    local_default = SNAPE_LOCAL_VENV
+    local_default = env_var.SNAPE_LOCAL_VENV
 
     # All variables constructed locally should be printed out
     # All functional objects must be removed from the output.

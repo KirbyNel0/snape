@@ -1,9 +1,9 @@
 from typing import Callable, Any
 
+from snape import env_var
 from snape.cli import parser
 from snape.cli.commands import snape_setup_init
-from snape.config import FORBIDDEN_ENV_NAMES
-from snape.env_var import SNAPE_DIR, SHELL
+from snape.config import FORBIDDEN_ENV_NAMES, SHELLS
 from snape.util import log, toggle_io
 
 __all__ = [
@@ -32,13 +32,15 @@ def main() -> None:
     toggle_io(informational=not args.quiet, debug=args.verbose)
 
     if args.shell is not None:
-        global SHELL
-        SHELL = args.shell
-    log("Enabled shell:", SHELL)
+        env_var.__VARS__["SHELL"] = args.shell
+
+    if env_var.SHELL not in SHELLS:
+        raise KeyError(f"Snape does not support the shell '{env_var.SHELL}' yet")
+    log("Enabled shell:", env_var.SHELL)
 
     # Ensure the root directory exists, except when snape is initialized for the first time
-    if args.func != snape_setup_init and SNAPE_DIR is not None and not SNAPE_DIR.is_dir():
-        raise NotADirectoryError(f"Snape root is not a valid directory: {SNAPE_DIR}")
+    if args.func != snape_setup_init and env_var.SNAPE_ROOT_PATH is not None and not env_var.SNAPE_ROOT_PATH.is_dir():
+        raise NotADirectoryError(f"Snape root is not a valid directory: {env_var.SNAPE_ROOT_PATH}")
 
     # Done preprocessing
     func: Callable[[Any, ...], None] = args.func

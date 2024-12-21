@@ -1,7 +1,7 @@
 import argparse
 
+from snape import env_var
 from snape.config import SHELLS
-from snape.env_var import SHELL
 
 
 __all__ = [
@@ -52,7 +52,7 @@ technical:
 # This will be applied globally for the script (see __main__).
 parser.add_argument(
     "-s", "--shell",
-    help=f"select a specific shell instead of the current shell (default: {SHELL})",
+    help=f"select a specific shell instead of the current shell (default: {env_var.SHELL})",
     action="store", default=None, metavar="SHELL", choices=list(SHELLS.keys())
 )
 parser.add_argument(
@@ -72,16 +72,17 @@ The object containing all subcommands. The application will only run if a subcom
 
 All subcommands (e.g. new/delete) are defined below in their own separate sections.
 Each of these subcommands can implement custom logic in a function.
-That function receives all arguments passed to the subcommand as object and can then process them.
-The function must be registered as default for the "func" parameter to that subcommand.
+That function receives all arguments passed to the subcommand and can then process them.
+The function must be registered as default for the ``func`` parameter to that subcommand.
 
 All arguments should be copied to local variables at the beginning of a function to make the code more readable.
 
 Example:
 
-    def my_func(argv: argparse.Namespace): ...
-    subcommand = subparsers.add_parser(...)
-    subcommand.set_defaults(func=my_func)
+    from snape.cli.parser import subcommands
+    def snape_foo(...): ...
+    snape_foo_parser = subcommands.add_parser(title="foo", ...)
+    snape_foo_parser.set_defaults(func=my_func)
 
 With this, the subcommand will work properly with the application.
 

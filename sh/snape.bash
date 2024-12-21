@@ -2,7 +2,16 @@
 
 if ! (return 0 2>/dev/null); then
 	echo "This script must be sourced to work properly" 1>&2
-	exit 100
+	return 100
+fi
+
+if [ -z "$SNAPE_PYTHON" ]; then
+	export SNAPE_PYTHON="/usr/bin/python3"
+fi
+
+if ! "$SNAPE_PYTHON" -c "import venv" >/dev/null 2>&1; then
+	echo "Python installation or venv package not found" 1>&2
+	return 2
 fi
 
 if [ -z "$SNAPE_ROOT" ]; then
@@ -17,14 +26,14 @@ if [ -z "$SNAPE_LOCAL_VENV" ]; then
 	export SNAPE_LOCAL_VENV=".venv"
 fi
 
-SNAPE_PY=$(realpath "$(dirname "${BASH_SOURCE[0]}")/../snape/run.py")
-SNAPE_PY_CMD="help --help -h new touch delete rm list setup status possess"
+SNAPE_SCRIPT=$(realpath "$(dirname "${BASH_SOURCE[0]}")/../snape/run.py")
+SNAPE_SCRIPT_CMD="help --help -h new touch delete rm list setup status possess"
 
 mkdir -p "$SNAPE_ROOT"
 
 if ! test -d "$SNAPE_ROOT"; then
 	echo "Unable to create snape directory" 1>&2
-	return 1
+	return 3
 fi
 
 # No environment given
@@ -38,8 +47,8 @@ if [[ $# -eq 0 ]]; then
 	# Snape is inactive => activate default environment
 	if ! [[ -f "$SNAPE_ROOT/$SNAPE_VENV/bin/activate" && -f "$SNAPE_ROOT/$SNAPE_VENV/bin/python" ]]; then
 		# The default environment does not exist, create it
-		if ! /usr/bin/python3 "$SNAPE_PY" new "$SNAPE_VENV"; then
-			return 2
+		if ! "$SNAPE_PYTHON" "$SNAPE_SCRIPT" new "$SNAPE_VENV"; then
+			return 4
 		fi
 	fi
 
@@ -49,8 +58,8 @@ if [[ $# -eq 0 ]]; then
 fi
 
 # This seems like a python problem
-if echo "$SNAPE_PY_CMD" | grep -wq -- "$1"; then
-	/usr/bin/python3 "$SNAPE_PY" $@
+if echo "$SNAPE_SCRIPT_CMD" | grep -wq -- "$1"; then
+	"$SNAPE_PYTHON" "$SNAPE_SCRIPT" $@
 	return $?
 fi
 
@@ -67,7 +76,7 @@ if [[ "$#" == 1 ]]; then
 		if ! [[ -f "$SNAPE_LOCAL_VENV/bin/activate" && -f "$SNAPE_LOCAL_VENV/bin/python" ]]; then
 			echo "No snape environment found in the current directory" >&2
 			echo "Run snape new --here to create one" >&2
-			return 1
+			return 5
 		fi
 
 		source "$SNAPE_LOCAL_VENV/bin/activate"
@@ -83,14 +92,14 @@ if [[ "$#" == 1 ]]; then
 		if source "$SNAPE_ROOT/$1/bin/activate"; then
 			return 0
 		else
-			return 3
+			return 6
 		fi
 	else
-		echo "No environment named $1"
-		return 4
+		echo "No environment named '$1'"
+		return 7
 	fi
 fi
 
 # This script cannot handle more than one argument,
 # anything else is passed to the python script
-/usr/bin/python3 "$SNAPE_PY" $@
+"$SNAPE_PYTHON" "$SNAPE_SCRIPT" $@

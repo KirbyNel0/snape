@@ -1,9 +1,9 @@
 from pathlib import Path
 
+from snape import env_var
 from snape.annotations import SnapeCancel
 from snape.cli import subcommands
 from snape.config import FORBIDDEN_ENV_NAMES
-from snape.env_var import SNAPE_DIR
 from snape.util import log, info, ask
 from snape.virtualenv import ensure_venv, get_snape_venv_path, get_venv_packages, create_new_snape_venv, install_packages, \
     delete_snape_venv
@@ -30,7 +30,7 @@ def snape_possess(
     log("Old venv found:", old_venv)
 
     # Check whether the environment is located at snape root (is global environment)
-    if old_venv.parent == SNAPE_DIR:
+    if old_venv.parent == env_var.SNAPE_ROOT_PATH:
         log("Old environment is already known to snape")
         info("Nothing to do")
         return
