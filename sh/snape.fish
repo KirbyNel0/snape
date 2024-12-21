@@ -17,7 +17,7 @@ if [ -z "$SNAPE_LOCAL_VENV" ]
     set -x SNAPE_LOCAL_VENV .venv
 end
 
-set -l SNAPE_PY (dirname (status current-filename))/snape.py
+set -l SNAPE_PY (realpath (dirname (status current-filename))/../snape/snape.py)
 set -l SNAPE_PY_CMD "help --help -h new touch delete rm list setup status possess"
 
 mkdir -p "$SNAPE_ROOT"

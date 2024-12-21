@@ -1,0 +1,20 @@
+{
+	"illegal-env-names": [
+		"here",
+		"--here"
+	],
+	"shells": {
+		"bash": {
+			"init_file": "~/.bashrc",
+			"source_alias": "alias snape='source {}'",
+			"snape_shell_script": "snape.bash",
+			"activate_file": "bin/activate"
+		},
+		"fish": {
+			"init_file": "~/.config/fish/config.fish",
+			"source_alias": "function snape; source '{}' $argv; end",
+			"snape_shell_script": "snape.fish",
+			"activate_file": "bin/activate.fish"
+		}
+	}
+}
