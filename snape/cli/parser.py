@@ -80,9 +80,11 @@ All arguments should be copied to local variables at the beginning of a function
 Example:
 
     from snape.cli.parser import subcommands
-    def snape_foo(...): ...
-    snape_foo_parser = subcommands.add_parser(title="foo", ...)
-    snape_foo_parser.set_defaults(func=my_func)
+    def snape_foo(bar: bool):
+        print("Hello" if bar else "Bye")
+    snape_foo_parser = subcommands.add_parser(title="foo", description="...", help="...")
+    snape_foo_parser.add_argument("-b", "--foo-bar", action="store_true", dest="bar", default=False)
+    snape_foo_parser.set_defaults(func=snape_foo)
 
 With this, the subcommand will work properly with the application.
 
