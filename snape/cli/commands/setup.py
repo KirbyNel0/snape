@@ -48,6 +48,10 @@ def snape_setup_init() -> None:
     if not snape_shell_script.is_file():
         raise FileNotFoundError(f"Snape shell script not found: {snape_shell_script}")
 
+    if not init_file.is_file():
+        log("Creating file", init_file)
+        with open(init_file, "w"): pass
+
     # Check whether the alias exists
     with open(init_file, "r") as f:
         content = f.readlines()

@@ -10,6 +10,18 @@
 			"snape_shell_script": "snape.bash",
 			"activate_file": "bin/activate"
 		},
+		"zsh": {
+			"init_file": "~/.zshrc",
+			"source_alias": "alias snape='source {}'",
+			"snape_shell_script": "snape.zsh",
+			"activate_file": "bin/activate"
+		},
+		"ksh": {
+			"init_file": "~/.kshrc",
+			"source_alias": "alias snape='source {}'",
+			"snape_shell_script": "snape.ksh",
+			"activate_file": "bin/activate"
+		},
 		"fish": {
 			"init_file": "~/.config/fish/config.fish",
 			"source_alias": "function snape; source '{}' $argv; end",

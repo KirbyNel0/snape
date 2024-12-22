@@ -93,7 +93,7 @@ def create_new_snape_venv(env: Path, overwrite: bool | None, autoupdate: bool) -
                 return None
             overwrite = True
 
-    locality = "global" if is_global_snape_venv(env) else "local"
+    locality = "global" if is_global_snape_venv_path(env) else "local"
     info(f"Creating {locality} snape environment:", env.name)
     log("Creating virtual environment at", env)
     python_venv.create(env, with_pip=True, clear=overwrite, upgrade_deps=autoupdate)

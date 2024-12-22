@@ -16,7 +16,8 @@ EOF
 	exit 0
 fi
 
-if [ -z "$SNAPE_PYTHON" ]; then
+if [ -z "$SNAPE_PYTHON" ]
+then
 	export SNAPE_PYTHON="/usr/bin/python3"
 fi
 
