@@ -48,3 +48,15 @@ After installation, `snape` is available as a normal shell command. To list all 
 ```shell
 snape help
 ```
+
+## Autocompletion
+
+Autocompletion is currently only supported for the `bash` shell.
+It will complete available environments to activate.
+
+To enable autocompletion for the `bash` shell, put the following line into your `~/.bashrc` file, where `~/.local/snape`
+is the path to the `snape` repository:
+
+```bash
+source ~/.local/snape/autocompletion/snape-complete.bash
+```

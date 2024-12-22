@@ -1,3 +1,4 @@
+from .clean import snape_clean
 from .delete import snape_delete
 from .help import snape_help
 from .new import snape_new
@@ -7,6 +8,7 @@ from .status import snape_status
 
 
 __all__ = [
+    "snape_clean",
     "snape_delete",
     "snape_help",
     "snape_new",
