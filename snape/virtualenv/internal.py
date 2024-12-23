@@ -8,8 +8,7 @@ from snape import env_var
 from snape.util import absolute_path, ask, log, info
 from snape.virtualenv import is_venv, is_active_venv
 from snape.config import FORBIDDEN_ENV_NAMES
-from snape.annotations import VirtualEnv
-
+from snape.annotations import VirtualEnv, SnapeCancel
 
 __all__ = [
     "is_global_snape_venv",
@@ -20,14 +19,16 @@ __all__ = [
 ]
 
 
-def is_global_snape_venv_path(env: Path) -> bool:
+def is_global_snape_venv_path(env: Path, check_exists: bool = True) -> bool:
     """
     Checks whether the specified environment path is located at the global snape venv directory.
 
     :param env: The environment to check.
+    :param check_exists: If ``True``, this method will only return ``True`` if the specified path exists as a directory.
+        Otherwise, the path contents will only be compared.
     :return: Whether ``env`` is a child directory of ``SNAPE_DIR``.
     """
-    return absolute_path(env.parent) == env_var.SNAPE_ROOT_PATH and env.is_dir()
+    return absolute_path(env.parent) == env_var.SNAPE_ROOT_PATH and ((not check_exists) or env.is_dir())
 
 
 def is_global_snape_venv(env: VirtualEnv | Path) -> bool:
@@ -93,7 +94,7 @@ def create_new_snape_venv(env: Path, overwrite: bool | None, autoupdate: bool) -
                 return None
             overwrite = True
 
-    locality = "global" if is_global_snape_venv_path(env) else "local"
+    locality = "global" if is_global_snape_venv_path(env, check_exists=False) else "local"
     info(f"Creating {locality} snape environment:", env.name)
     log("Creating virtual environment at", env)
     python_venv.create(env, with_pip=True, clear=overwrite, upgrade_deps=autoupdate)
@@ -116,8 +117,10 @@ def delete_snape_venv(env: VirtualEnv, no_ask: bool, ignore_active: bool) -> Non
     locality = "global" if is_global_snape_venv(env) else "local"
     if no_ask or ask(f"Are you sure you want to delete the {locality} environment '{env.name}'?", False):
         shutil.rmtree(env)
+    else:
+        raise SnapeCancel()
 
-    if not env.is_dir():
+    if env.is_dir():
         raise SystemError(f"Could not delete virtual environment: {env}")
 
     info(f"Deleted {locality} snape environment", env.name)

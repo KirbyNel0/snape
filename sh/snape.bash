@@ -70,7 +70,6 @@ if [[ "$#" == 1 ]]; then
 		# Environment is active, deactivate
 		if [[ -n "$VIRTUAL_ENV" ]]; then
 			deactivate
-			return 0
 		fi
 
 		if ! [[ -f "$SNAPE_LOCAL_VENV/bin/activate" && -f "$SNAPE_LOCAL_VENV/bin/python" ]]; then

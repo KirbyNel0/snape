@@ -46,12 +46,11 @@ def snape_status(
 
     snape_envs_str = []
     for env in snape_envs:
-        prefix = "  \033[32m*\033[0m" if env == snape_env else "  *"
+        prefix = "  \033[32m*\033[0m" if env.name == snape_env else "  *"
         suffix = "(default)" if env == snape_default else ""
         snape_envs_str.append(f"{prefix} {env.name} {suffix}")
 
-    local_active_status = "\033[32m*\033[0m active" if local_active else "inactive"
-    local_exists_status = "exists" if local_exists else "no venv found"
+    local_status = ("active" if local_active else "inactive") if local_exists else "not found"
 
     indent = "\n\t"
     print(
@@ -65,9 +64,8 @@ Global snape environments:
         {indent.join(snape_envs_str)}
 
 Local snape environments:
-    Name of local venvs: {local_default}
-    Current directory:   {local_exists_status}
-    Status:              {local_active_status}"""
+    Directory:     {local_default}
+    Status:        {local_status}"""
     )
 
 

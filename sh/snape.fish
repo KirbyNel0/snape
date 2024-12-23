@@ -70,7 +70,6 @@ if [ (count $argv) -eq 1 ]
 		# Environment is active, deactivate
 		if [ -n "$VIRTUAL_ENV" ]
 			deactivate
-			exit 0
 		end
 
 		if ! [ -f "$SNAPE_LOCAL_VENV/bin/activate.fish" -a -f "$SNAPE_LOCAL_VENV/bin/python" ]

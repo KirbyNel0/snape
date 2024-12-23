@@ -19,7 +19,7 @@ def snape_new(
     For argument documentation, see ``snape_new_parser``.
     """
     if here and env is not None:
-        raise ValueError("snape delete --here: Cannot provide an environment name")
+        raise ValueError("snape new --here: Cannot provide an environment name")
 
     new_venv_path = get_snape_venv_path(env, here)
 

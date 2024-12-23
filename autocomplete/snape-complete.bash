@@ -11,6 +11,13 @@ if [ -z "$SNAPE_LOCAL_VENV" ]; then
 fi
 
 function _snape_autocomplete() {
+	# If not autocompleting the first argument, default to file autocompletion
+	if [ "$COMP_CWORD" -ne 1 ]
+	then
+		COMPREPLY=($(compgen -A file -- "${COMP_WORDS[$COMP_CWORD]}"))
+		return
+	fi
+
 	local ENVS=()
 
 	# Check for existing global environments
