@@ -57,30 +57,6 @@ snape_new_parser.add_argument(
     help="the name of the new environment",
     action="store", default=None
 )
-# Whether to prompt the user for existing venv
-snape_new_parser.add_argument(
-    "-o", "--overwrite",
-    help="overwrite existing environments without prompting first",
-    action="store_true", default=False, dest="overwrite"
-)
-# Whether to update pip (see venv package), this usually takes a while
-snape_new_parser.add_argument(
-    "-n", "--no-update",
-    help="do not update pip after initializing the environment",
-    action="store_true", default=False, dest="no_update"
-)
-# Can be given to specify a requirements.txt file into the new environment
-snape_new_parser.add_argument(
-    "-r", "--requirements",
-    help="install the specified file into the environment",
-    action="store", default=None, metavar="FILE", dest="requirements"
-)
-# If specified with -r, the output of 'pip install -r' will not be printed
-snape_new_parser.add_argument(
-    "-q", "--quiet",
-    help="hide output from pip when installing requirements",
-    action="store_true", default=False, dest="requirements_quiet"
-)
 # If specified, a local environment will be created instead of a global one
 snape_new_parser.add_argument(
     "-l", "--local", "--here",
@@ -88,4 +64,30 @@ snape_new_parser.add_argument(
          "not allowed to provide 'env'.",
     action="store_true", default=False, dest="here"
 )
+# Whether to prompt the user for existing venv
+snape_new_parser.add_argument(
+    "-o", "--overwrite",
+    help="overwrite existing environments without prompting first",
+    action="store_true", default=False, dest="overwrite"
+)
 snape_new_parser.set_defaults(func=snape_new)
+
+snape_new_parser_packages = snape_new_parser.add_argument_group("pip and packages")
+# Whether to update pip (see venv package), this usually takes a while
+snape_new_parser_packages.add_argument(
+    "-n", "--no-update",
+    help="do not update pip after initializing the environment",
+    action="store_true", default=False, dest="no_update"
+)
+# Can be given to specify a requirements.txt file into the new environment
+snape_new_parser_packages.add_argument(
+    "-r", "--requirements",
+    help="install the specified file into the environment",
+    action="store", default=None, metavar="FILE", dest="requirements"
+)
+# If specified with -r, the output of 'pip install -r' will not be printed
+snape_new_parser_packages.add_argument(
+    "-q", "--quiet",
+    help="hide output from pip when installing packages",
+    action="store_true", default=False, dest="requirements_quiet"
+)

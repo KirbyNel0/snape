@@ -50,7 +50,7 @@ def ensure_venv(env: Path) -> VirtualEnv:
     if not env.is_dir():
         raise NotADirectoryError(f"Virtual environment directory not found: {env}")
     if not is_venv(env):
-        raise SystemError(f"No a virtual environment: {env}")
+        raise SystemError(f"Not a virtual environment: {env}")
     return cast(VirtualEnv, absolute_path(env))
 
 

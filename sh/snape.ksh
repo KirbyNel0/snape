@@ -27,7 +27,7 @@ if [ -z "$SNAPE_LOCAL_VENV" ]; then
 fi
 
 SNAPE_SCRIPT=$(realpath "$(dirname "${.sh.file}")/../snape/run.py")
-SNAPE_SCRIPT_CMD="help --help -h new touch delete rm list setup status possess attach clean"
+SNAPE_SCRIPT_CMD="help --help -h new touch delete rm list setup status possess attach detach clean"
 
 mkdir -p "$SNAPE_ROOT"
 

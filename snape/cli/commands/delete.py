@@ -46,29 +46,30 @@ snape_delete_parser.add_argument(
     help="the name of the environment to delete",
     action="store", default=None
 )
-# Do not prompt before deletion
+# If specified, a local environment will be deleted instead of a global one
 snape_delete_parser.add_argument(
+    "-l", "--local", "--here",
+    help="remove the snape environment from the current directory. not allowed to provide 'env'.",
+    action="store_true", default=False, dest="here"
+)
+snape_delete_parser.set_defaults(func=snape_delete)
+
+snape_delete_parser_prompting = snape_delete_parser.add_argument_group("prompting")
+# Do not prompt before deletion
+snape_delete_parser_prompting.add_argument(
     "-f", "--no-ask",
     help="do not ask before deleting the environment",
     action="store_true", default=False, dest="no_ask"
 )
 # Whether to ignore non-existing directories
-snape_delete_parser.add_argument(
+snape_delete_parser_prompting.add_argument(
     "-e", "--ignore-not-exists",
     help="do not throw an error if the environment does not exist",
     action="store_true", default=False, dest="ignore_not_exists"
 )
-# If specified, a local environment will be deleted instead of a global one
-snape_delete_parser.add_argument(
-    "-l", "--local", "--here",
-    help="remove the snape environment from the current directory. "
-         "not allowed to provide 'env'.",
-    action="store_true", default=False, dest="here"
-)
 # Continue if environment is currently active
-snape_delete_parser.add_argument(
+snape_delete_parser_prompting.add_argument(
     "-r", "--ignore-active",
     help="do not exit if the specified environment is currently active",
     action="store_true", default=False, dest="ignore_active"
 )
-snape_delete_parser.set_defaults(func=snape_delete)

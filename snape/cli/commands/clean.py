@@ -63,7 +63,7 @@ snape_clean_parser = subcommands.add_parser(
 )
 snape_clean_parser.add_argument(
     "-l", "--local", "--here",
-    help="check for broken local environments",
+    help="check for a broken local environment",
     action="store_true", default=False, dest="here"
 )
 snape_clean_parser.add_argument(

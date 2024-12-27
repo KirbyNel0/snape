@@ -41,24 +41,29 @@ def is_global_snape_venv(env: VirtualEnv | Path) -> bool:
     return is_global_snape_venv_path(env) and is_venv(env)
 
 
-def get_snape_venv_path(name: str | None, local: bool) -> Path:
+def get_snape_venv_path(name: str | None, local: bool, warn_argument_conflicts: bool = True) -> Path:
     """
     Creates an absolute path pointing to a local or global snape environment with the specified name.
 
     :param name: The name of the new environment. This will be ignored for local environments and may not be ``None``
         for global environments. It may not be an illegal environment name.
     :param local: Whether the environment should be available globally or locally.
+    :param warn_argument_conflicts: Raise a ``RuntimeError`` if ``local=False`` and ``name=None``
     :return: The absolute path to the new environment.
     :exception NameError: Raised if an illegal environment name was specified for a global environment.
-    :exception ValueError: Raised if ``local=False`` and ``name=None``.
+    :exception ValueError: Raised if no name was provided when required.
     """
     if name in FORBIDDEN_ENV_NAMES:
         raise NameError("Illegal snape venv name: " + str(name))
 
+    if warn_argument_conflicts:
+        if name is None and not local:
+            raise RuntimeError("No environment name provided for global snape environment")
+
     if local:
         return absolute_path(Path.cwd() / env_var.SNAPE_LOCAL_VENV)
 
-    if name is None or len(name) == 0:
+    if not name:
         raise ValueError("No name provided for global snape environment")
 
     return absolute_path(env_var.SNAPE_ROOT_PATH / name)
