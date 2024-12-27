@@ -3,8 +3,8 @@ from pathlib import Path
 from typing import cast
 
 from snape import env_var
-from snape.config import SHELLS
 from snape.annotations import VirtualEnv
+from snape.config import SHELLS
 from snape.util import absolute_path, log, info
 
 __all__ = [
@@ -76,7 +76,9 @@ def get_venv_packages(env: VirtualEnv) -> list[str]:
     if process.returncode != 0:
         if process.stderr:
             log(process.stderr.decode())
-        raise RuntimeError(f"Cannot read package list, command 'pip freeze' terminated with exit code {process.returncode}")
+        raise RuntimeError(
+            f"Cannot read package list, command 'pip freeze' terminated with exit code {process.returncode}"
+        )
 
     # Create package list
     packages: list[str] = list(filter(lambda x: x, process.stdout.decode().split("\n")))

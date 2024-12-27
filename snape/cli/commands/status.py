@@ -2,14 +2,18 @@ import json
 from pathlib import Path
 
 from snape import env_var
-from snape.util import log
+from snape.cli._parser import subcommands
 from snape.util import absolute_path
-from snape.cli import subcommands
+from snape.util import log
 from snape.virtualenv import get_global_snape_venvs, is_venv
+
+__all__ = [
+    "snape_status"
+]
 
 
 def snape_status(
-    raw: bool
+        raw: bool
 ) -> None:
     """
     Outputs information on the current venv and snape status.

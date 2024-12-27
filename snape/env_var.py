@@ -14,9 +14,7 @@ from typing import Final
 
 from snape.util import absolute_path
 
-
 __all__ = []
-
 
 __VARS__: Final[dict[str, str | None]] = {
     # Select the current shell as default.

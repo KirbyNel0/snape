@@ -1,13 +1,11 @@
 from pathlib import Path
 from typing import TypedDict, NewType
 
-
 __all__ = [
     "ShellInfo",
     "VirtualEnv",
     "SnapeCancel"
 ]
-
 
 ShellInfo = TypedDict("ShellInfo", {
     # The path to the default init file for the shell
@@ -23,6 +21,7 @@ ShellInfo = TypedDict("ShellInfo", {
 
 VirtualEnv = NewType("VirtualEnv", Path)
 "An object of this type is a ``pathlib.Path`` object pointing to a verified virtual environment"
+
 
 class SnapeCancel(Warning):
     """If raised, the application should terminate without an error."""

@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 __all__ = [
     "absolute_path"
 ]

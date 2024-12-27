@@ -1,7 +1,11 @@
-from snape.cli import subcommands
-from snape.virtualenv.internal import get_snape_venv_path
+from snape.cli._parser import subcommands
 from snape.util import log
 from snape.virtualenv import ensure_venv, delete_snape_venv
+from snape.virtualenv.internal import get_snape_venv_path
+
+__all__ = [
+    "snape_delete"
+]
 
 
 def snape_delete(

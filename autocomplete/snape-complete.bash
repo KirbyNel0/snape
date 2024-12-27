@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 if [ -z "$SNAPE_ROOT" ]; then
 	export SNAPE_ROOT="$HOME/.snape"
 fi
@@ -12,8 +14,7 @@ fi
 
 function _snape_autocomplete() {
 	# If not autocompleting the first argument, default to file autocompletion
-	if [ "$COMP_CWORD" -ne 1 ]
-	then
+	if [ "$COMP_CWORD" -ne 1 ]; then
 		COMPREPLY=($(compgen -A file -- "${COMP_WORDS[$COMP_CWORD]}"))
 		return
 	fi
@@ -24,15 +25,13 @@ function _snape_autocomplete() {
 	for ENV in $(ls "$SNAPE_ROOT")
 	do
 		local SNAPE_ENV="${SNAPE_ROOT%/}/$ENV"
-		if [ -d "$SNAPE_ENV" -a -f "$SNAPE_ENV/bin/activate" -a "$SNAPE_ENV/bin/python" ]
-		then
+		if [ -d "$SNAPE_ENV" -a -f "$SNAPE_ENV/bin/activate" -a -f "$SNAPE_ENV/bin/python" ]; then
 			ENVS+=("$ENV")
 		fi
 	done
 
 	# Check for local environment
-	if [ -d "$SNAPE_LOCAL_VENV" ]
-	then
+	if [ -d "$SNAPE_LOCAL_VENV" ]; then
 		ENVS+=("--here")
 	fi
 

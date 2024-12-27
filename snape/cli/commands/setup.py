@@ -3,15 +3,16 @@ from pathlib import Path
 
 from snape import env_var
 from snape.annotations import SnapeCancel
-from snape.util import log, info, absolute_path, ask
+from snape.cli._parser import subcommands
 from snape.config import SHELLS
-from snape.cli import subcommands
+from snape.util import log, info, absolute_path, ask
 
 __all__ = [
     "snape_setup",
     "snape_setup_init",
     "snape_setup_remove"
 ]
+
 
 def snape_setup() -> None:
     snape_setup_parser.print_help()
@@ -76,9 +77,9 @@ snape_setup_init_parser.set_defaults(func=snape_setup_init)
 
 
 def snape_setup_remove(
-    everything: bool,
-    root: bool,
-    init: bool
+        everything: bool,
+        root: bool,
+        init: bool
 ) -> None:
     """
     Undo snape initialization

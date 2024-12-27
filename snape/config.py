@@ -9,9 +9,7 @@ __all__ = [
     "FORBIDDEN_ENV_NAMES"
 ]
 
-
 _CONFIG_FILE_PATH = Path(__file__).parent.parent / "config.json"
-
 
 with open(_CONFIG_FILE_PATH) as f:
     _CONFIG_FILE = json.load(f)
@@ -24,7 +22,6 @@ if "shells" not in _CONFIG_FILE:
     raise TypeError("Key 'shells' not found in config file")
 
 SHELLS: Final[Dict[str, ShellInfo]] = _CONFIG_FILE["shells"]
-
 
 # Forbidden env name configuration
 if "illegal-env-names" not in _CONFIG_FILE:

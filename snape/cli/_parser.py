@@ -3,12 +3,10 @@ import argparse
 from snape import env_var
 from snape.config import SHELLS
 
-
 __all__ = [
     "parser",
     "subcommands"
 ]
-
 
 # The parser of the application.
 # For more information, see the ``subcommands`` object.

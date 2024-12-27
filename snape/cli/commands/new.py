@@ -1,8 +1,12 @@
 from pathlib import Path
 
-from snape.cli import subcommands
+from snape.cli._parser import subcommands
 from snape.util import log
 from snape.virtualenv import create_new_snape_venv, get_snape_venv_path, install_requirements
+
+__all__ = [
+    "snape_new"
+]
 
 
 def snape_new(

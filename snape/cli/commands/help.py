@@ -1,11 +1,15 @@
 import sys
 
-from snape.cli import parser, subcommands
+from snape.cli._parser import parser, subcommands
 from snape.util import log
+
+__all__ = [
+    "snape_help"
+]
 
 
 def snape_help(
-    cmd: list[str]
+        cmd: list[str]
 ) -> None:
     """
     Prints out help on snape. Same as ``snape --help``.

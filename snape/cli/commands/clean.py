@@ -1,22 +1,33 @@
 import os
 import shutil
+from pathlib import Path
 
 from snape import env_var
-from snape.cli import subcommands
+from snape.cli._parser import subcommands
+from snape.util import ask, log, info
+from snape.virtualenv import get_global_snape_venvs, get_snape_venv_path, is_venv
 
 __all__ = [
     "snape_clean"
 ]
 
-from snape.util import ask, log, info
-
-from snape.virtualenv import get_global_snape_venvs
-
 
 def snape_clean(
-    no_ask: bool
+        no_ask: bool,
+        here: bool
 ):
-    log("Collecting unknown files")
+    if here:
+        log("Collecting unknown files at", Path.cwd())
+        local_venv = get_snape_venv_path(None, True)
+        if is_venv(local_venv):
+            info("Nothing to do")
+        else:
+            if no_ask or ask("Remove broken local environment?", default=True):
+                log("Removing directory", local_venv)
+                shutil.rmtree(local_venv)
+        return
+
+    log("Collecting unknown files at", env_var.SNAPE_ROOT)
     global_venv_files = list(map(lambda env: env_var.SNAPE_ROOT_PATH / env, os.listdir(env_var.SNAPE_ROOT_PATH)))
     global_venvs = get_global_snape_venvs()
     other_files = list(set(global_venv_files) - set(global_venvs))
@@ -49,6 +60,11 @@ snape_clean_parser = subcommands.add_parser(
     "clean",
     description="Delete unclassified files in the snape root directory\nwhich are no valid snape environments.",
     help="delete unclassified global environments"
+)
+snape_clean_parser.add_argument(
+    "-l", "--local", "--here",
+    help="check for broken local environments",
+    action="store_true", default=False, dest="here"
 )
 snape_clean_parser.add_argument(
     "-n", "--no-ask",

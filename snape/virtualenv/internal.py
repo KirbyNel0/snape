@@ -5,10 +5,10 @@ from pathlib import Path
 from typing import cast
 
 from snape import env_var
-from snape.util import absolute_path, ask, log, info
-from snape.virtualenv import is_venv, is_active_venv
-from snape.config import FORBIDDEN_ENV_NAMES
 from snape.annotations import VirtualEnv, SnapeCancel
+from snape.config import FORBIDDEN_ENV_NAMES
+from snape.util import absolute_path, ask, log, info
+from snape.virtualenv.util import is_venv, is_active_venv
 
 __all__ = [
     "is_global_snape_venv",
@@ -53,7 +53,7 @@ def get_snape_venv_path(name: str | None, local: bool) -> Path:
     :exception ValueError: Raised if ``local=False`` and ``name=None``.
     """
     if name in FORBIDDEN_ENV_NAMES:
-        raise NameError("Illegal snape venv name: ", name)
+        raise NameError("Illegal snape venv name: " + str(name))
 
     if local:
         return absolute_path(Path.cwd() / env_var.SNAPE_LOCAL_VENV)
@@ -87,7 +87,9 @@ def create_new_snape_venv(env: Path, overwrite: bool | None, autoupdate: bool) -
 
     if env.is_dir():
         if not is_venv(env):
-            raise IsADirectoryError(f"Directory {env} exists and is not an existing environment which could be overwritten")
+            raise IsADirectoryError(
+                f"Directory {env} exists and is not an existing environment which could be overwritten"
+            )
 
         if overwrite is None:
             if not ask(f"Environment '{env.name}' does already exist. Overwrite?", False):

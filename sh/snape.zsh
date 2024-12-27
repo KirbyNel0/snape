@@ -27,7 +27,7 @@ if [ -z "$SNAPE_LOCAL_VENV" ]; then
 fi
 # Only without compatibility mode!
 SNAPE_SCRIPT=$(realpath "$(dirname "$0")/../snape/run.py")
-SNAPE_SCRIPT_CMD="help --help -h new touch delete rm list setup status possess clean"
+SNAPE_SCRIPT_CMD="help --help -h new touch delete rm list setup status possess attach clean"
 
 mkdir -p "$SNAPE_ROOT"
 

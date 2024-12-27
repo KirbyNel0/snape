@@ -1,20 +1,15 @@
 from typing import Callable, Any
 
 from snape import env_var
-from snape.cli import parser
+from snape.cli._parser import parser
 from snape.cli.commands import snape_setup_init
-from snape.config import FORBIDDEN_ENV_NAMES, SHELLS
+from snape.config import SHELLS
 from snape.util import log, toggle_io
 
 __all__ = [
     "main"
 ]
 
-# Mark the names of all snape arguments as illegal venv names
-FORBIDDEN_ENV_NAMES.extend(parser._option_string_actions.keys())
-
-# Mark the names of all subcommands as illegal venv names
-FORBIDDEN_ENV_NAMES.extend(parser._actions[-1].choices.keys())
 
 def main() -> None:
     """
