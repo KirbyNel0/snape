@@ -26,13 +26,22 @@ cd ~/.local/snape
 sh setup.sh
 ```
 
-This will modify your shell initialization file to load the `snape` alias/function on shell startup.
+This will modify your shell initialization file (e.g. `~/.bashrc`) to load the `snape` function on shell startup.
 Restart your shell to finish installation.
 
 Snape will infer what shell you are using by reading the `$SHELL` variable.
 If you want to install snape for a different shell (e.g. `zsh`), use `sh setup.sh -s zsh` instead.
 
-## Deinstallation
+### Manual installation
+
+If you want to install snape manually, put the following line into your shell initialization file,
+where `~/.local/snape` is the path to the snape repository and `SHELL` is your shell (e.g. `bash`):
+
+```shell
+source "~/.local/snape/sh/snape.SHELL"
+```
+
+## Remove snape
 
 To remove snape, run the following commands:
 
@@ -51,14 +60,5 @@ After installation, `snape` is available as a normal shell command. To list all 
 snape help
 ```
 
-## Autocompletion
-
-Currently, autocompletion is only supported for the `bash` shell.
-It will complete available environments to activate.
-
-To enable autocompletion for the `bash` shell, put the following line into your `~/.bashrc` file, where `~/.local/snape`
-is the path to the `snape` repository:
-
-```bash
-source ~/.local/snape/autocomplete/snape-complete.bash
-```
+Currently, snape supports autocompletion for the `bash` shell. It will autocomplete basic commands and available
+environments which can be activated.

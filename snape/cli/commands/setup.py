@@ -36,14 +36,14 @@ def snape_setup_init() -> None:
     """
     # Get shell-dependent arguments
     shell = SHELLS[env_var.SHELL]
-    snape_shell_script: Path = env_var.SNAPE_REPO_PATH / "sh" / shell["snape_shell_script"]
+    snape_shell_script: Path = env_var.SNAPE_REPO_PATH / "sh" / f"snape.{env_var.SHELL}"
     init_file: Path = absolute_path(shell["init_file"])
-    source_alias: str = shell["source_alias"].format(snape_shell_script)
+    source_line: str = f"source '{snape_shell_script}'"
     # Only used by is_venv function: activate_file = shell["activate_file"]
 
     log("Shell:          ", env_var.SHELL)
     log("Shell init file:", init_file)
-    log("Snape command:  ", source_alias)
+    log("Snape command:  ", source_line)
 
     # The snape shell script must exist, otherwise this is not allowed to proceed
     if not snape_shell_script.is_file():
@@ -53,17 +53,17 @@ def snape_setup_init() -> None:
         log("Creating file", init_file)
         with open(init_file, "w"): pass
 
-    # Check whether the alias exists
+    # Check whether the source line exists
     with open(init_file, "r") as f:
         content = f.readlines()
-        if source_alias in content:
+        if source_line in content or source_line+"\n" in content:
             info(f"Snape has already been initialized for the {env_var.SHELL} shell, nothing changed")
             raise SnapeCancel()
-        log(source_alias, "not found in", init_file)
+        log(source_line, "not found in", init_file)
 
-    # Write the alias
-    with open(init_file, "a") as f:
-        f.writelines(["\n", source_alias])
+    # Write the source line
+    with open(init_file, "a") as init_file_stream:
+        print(source_line, file=init_file_stream)
 
     info("Initialized snape for", env_var.SHELL, "at", init_file)
 
@@ -98,14 +98,14 @@ def snape_setup_remove(
 
     # Get shell-dependent arguments
     shell = SHELLS[env_var.SHELL]
-    snape_shell_script: Path = env_var.SNAPE_REPO_PATH / "sh" / shell["snape_shell_script"]
+    snape_shell_script: Path = env_var.SNAPE_REPO_PATH / "sh" / f"snape.{env_var.SHELL}"
     init_file: Path = absolute_path(shell["init_file"])
-    source_alias: str = shell["source_alias"].format(snape_shell_script)
+    source_line: str = f"source '{snape_shell_script}'"
     # Only used by is_venv function: activate_file = shell["activate_file"]
 
     log("Shell:          ", env_var.SHELL)
     log("Shell init file:", init_file)
-    log("Snape command:  ", source_alias)
+    log("Snape command:  ", source_line)
 
     # Check if any arguments were given
     if all(map(lambda x: not x, argv.values())):
@@ -126,8 +126,11 @@ def snape_setup_remove(
     if argv["init"]:
         with open(init_file, "r") as f:
             content = f.readlines()
-            if source_alias in content:
-                content.remove(source_alias)
+            if source_line in content:
+                content.remove(source_line)
+                new_content = content
+            elif source_line+"\n" in content:
+                content.remove(source_line+"\n")
                 new_content = content
             else:
                 info("Snape has not yet been initialized for", env_var.SHELL)
