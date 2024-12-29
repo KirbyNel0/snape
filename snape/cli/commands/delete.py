@@ -12,7 +12,7 @@ def snape_delete(
         env: str | None,
         ignore_not_exists: bool,
         here: bool,
-        no_ask: bool,
+        do_ask: bool,
         ignore_active: bool
 ) -> None:
     """
@@ -35,7 +35,7 @@ def snape_delete(
         else:
             raise e
 
-    delete_snape_venv(old_venv, no_ask, ignore_active)
+    delete_snape_venv(old_venv, do_ask, ignore_active)
 
 
 # The subcommand parser for ``snape delete``.
@@ -59,7 +59,7 @@ snape_delete_parser_prompting = snape_delete_parser.add_argument_group("promptin
 snape_delete_parser_prompting.add_argument(
     "-f", "--no-ask",
     help="do not ask before deleting the environment",
-    action="store_true", default=False, dest="no_ask"
+    action="store_false", default=True, dest="do_ask"
 )
 # Whether to ignore non-existing directories
 snape_delete_parser_prompting.add_argument(

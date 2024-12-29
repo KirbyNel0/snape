@@ -11,7 +11,7 @@ __all__ = [
 
 def snape_new(
         env: str | None,
-        no_update: bool,
+        do_update: bool,
         requirements: str | None,
         requirements_quiet: bool,
         here: bool,
@@ -42,7 +42,7 @@ def snape_new(
     if not overwrite:
         overwrite = None
     # Create environment
-    new_venv = create_new_snape_venv(new_venv_path, overwrite, not no_update)
+    new_venv = create_new_snape_venv(new_venv_path, overwrite, do_update)
 
     # Install requirements
     if requirements_file:
@@ -77,7 +77,7 @@ snape_new_parser_packages = snape_new_parser.add_argument_group("pip and package
 snape_new_parser_packages.add_argument(
     "-n", "--no-update",
     help="do not update pip after initializing the environment",
-    action="store_true", default=False, dest="no_update"
+    action="store_false", default=True, dest="do_update"
 )
 # Can be given to specify a requirements.txt file into the new environment
 snape_new_parser_packages.add_argument(

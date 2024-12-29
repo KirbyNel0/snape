@@ -77,24 +77,13 @@ snape_setup_init_parser.set_defaults(func=snape_setup_init)
 
 
 def snape_setup_remove(
-        everything: bool,
-        root: bool,
-        init: bool
+        argv: list[str]
 ) -> None:
     """
     Undo snape initialization
 
     For argument documentation, see ``snape_setup_remove``.
     """
-    argv = dict(**locals())
-    del root
-    del init
-
-    if everything:
-        for arg in argv:
-            log(f"{arg} = True")
-            argv[arg] = True
-        del arg
 
     # Get shell-dependent arguments
     shell = SHELLS[env_var.SHELL]
@@ -108,11 +97,11 @@ def snape_setup_remove(
     log("Snape command:  ", source_line)
 
     # Check if any arguments were given
-    if all(map(lambda x: not x, argv.values())):
+    if len(argv) == 0:
         log("No arguments given")
         info("Nothing to do")
 
-    if argv["root"]:
+    if "root" in argv:
         log("Attempting to remove", env_var.SNAPE_ROOT_PATH)
         if ask("Are you sure you want to remove all global environments?", default=False):
             log("Removing", env_var.SNAPE_ROOT_PATH)
@@ -123,7 +112,7 @@ def snape_setup_remove(
                 log("Removed", env_var.SNAPE_ROOT_PATH)
                 info("Successfully removed all global environments")
 
-    if argv["init"]:
+    if "init" in argv:
         with open(init_file, "r") as f:
             content = f.readlines()
             if source_line in content:
@@ -152,17 +141,17 @@ snape_setup_remove_parser = snape_setup_subcommands.add_parser(
 snape_setup_remove_parser.add_argument(
     "-a", "--all",
     help="remove everything snape changed in your current shell",
-    action="store_true", default=False, dest="everything"
+    action="store_const", const=["init", "root"], default=[], dest="argv"
 )
 snape_setup_remove_parser.add_argument(
     "-i", "--init",
     help="undo the effects of snape setup init",
-    action="store_true", default=False, dest="init"
+    action="append_const", const="init", default=None, dest="argv"
 )
 # Remove all global environments as well
 snape_setup_remove_parser.add_argument(
     "-r", "--root",
     help="remove the $SNAPE_ROOT directory containing all environments",
-    action="store_true", default=False, dest="root"
+    action="append_const", const="root", default=None, dest="argv"
 )
 snape_setup_remove_parser.set_defaults(func=snape_setup_remove)

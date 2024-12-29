@@ -11,6 +11,7 @@ from snape.util import absolute_path, ask, log, info
 from snape.virtualenv.util import is_venv, is_active_venv
 
 __all__ = [
+    "is_global_snape_venv_path",
     "is_global_snape_venv",
     "get_snape_venv_path",
     "create_new_snape_venv",
@@ -108,12 +109,12 @@ def create_new_snape_venv(env: Path, overwrite: bool | None, autoupdate: bool) -
     return cast(VirtualEnv, absolute_path(env))
 
 
-def delete_snape_venv(env: VirtualEnv, no_ask: bool, ignore_active: bool) -> None:
+def delete_snape_venv(env: VirtualEnv, do_ask: bool, ignore_active: bool) -> None:
     """
     Deletes a snape environment. If it is attempted to delete an active environment, an error is raised.
 
     :param env: The virtual environment to delete.
-    :param no_ask: If ``True``, the user will not be prompted before deleting the environment.
+    :param do_ask: If ``False``, the user will not be prompted before deleting the environment.
     :param ignore_active: If ``True``, it will be ignored if the environment to delete is active.
     :exception RuntimeError: Raised if the environment is active and ``ignore_active`` is ``False``.
     :exception SystemError: Raised if the environment could not be deleted.
@@ -122,7 +123,7 @@ def delete_snape_venv(env: VirtualEnv, no_ask: bool, ignore_active: bool) -> Non
         raise RuntimeError(f"Environment {env.name} is currently active. Deactivate it before deletion.")
 
     locality = "global" if is_global_snape_venv(env) else "local"
-    if no_ask or ask(f"Are you sure you want to delete the {locality} environment '{env.name}'?", False):
+    if (not do_ask) or ask(f"Are you sure you want to delete the {locality} environment '{env.name}'?", False):
         shutil.rmtree(env)
     else:
         raise SnapeCancel()

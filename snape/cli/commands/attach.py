@@ -17,8 +17,8 @@ def snape_attach(
         here: bool,
         global_name: str | None,
         ignore_active: bool,
-        no_ask: bool,
-        no_update: bool,
+        do_ask: bool,
+        do_update: bool,
         overwrite: bool,
         delete_old: bool,
         requirements_quiet: bool
@@ -55,18 +55,18 @@ def snape_attach(
     # Create output and prompt
     locality = "local" if here else "global"
     question = f"Do you want to create a new {locality} environment named '{new_venv_path.name}' with the requirements of '{env}'?"
-    if not no_ask and not ask(question, default=True):
+    if do_ask and not ask(question, default=True):
         raise SnapeCancel()
 
     if not overwrite:
         overwrite = None
-    new_venv = create_new_snape_venv(new_venv_path, overwrite, not no_update)
+    new_venv = create_new_snape_venv(new_venv_path, overwrite, do_update)
 
     if not install_packages(new_venv, packages, requirements_quiet):
         raise RuntimeError("Could not install all packages")
 
     if delete_old:
-        delete_snape_venv(old_venv, no_ask, ignore_active)
+        delete_snape_venv(old_venv, do_ask, ignore_active)
 
 
 # The subcommand parser for ``snape attach``.
@@ -80,7 +80,7 @@ snape_attach_parser = subcommands.add_parser(
 snape_attach_parser.add_argument(
     "env",
     help="the name or path to the environment to make available to snape",
-    action="store"
+    action="store", metavar="env-path"
 )
 snape_attach_parser.set_defaults(func=snape_attach)
 
@@ -93,7 +93,7 @@ snape_attach_parser_new_env.add_argument(
 )
 # A new name for the new global environment
 snape_attach_parser_new_env.add_argument(
-    "-g", "--global-name",
+    "->", "--global-name",
     help="give the new environment an other name. without this, it will have the same name as the old environment.",
     action="store", default=None, dest="global_name", metavar="NAME"
 )
@@ -114,7 +114,7 @@ snape_attach_parser_packages.add_argument(
 snape_attach_parser_packages.add_argument(
     "-n", "--no-update",
     help="do not update pip after initializing the new environment",
-    action="store_true", default=False, dest="no_update"
+    action="store_false", default=True, dest="do_update"
 )
 
 snape_attach_parser_old_env = snape_attach_parser.add_argument_group("old environment")
@@ -126,7 +126,7 @@ snape_attach_parser_old_env.add_argument(
 snape_attach_parser_old_env.add_argument(
     "-a", "--no-ask",
     help="do not prompt before deleting the old environment (with -d)",
-    action="store_true", default=False, dest="no_ask"
+    action="store_false", default=True, dest="do_ask"
 )
 # Continue if environment is currently active
 snape_attach_parser_old_env.add_argument(

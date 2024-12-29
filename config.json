@@ -1,7 +1,8 @@
 {
 	"illegal-env-names": [
 		"here",
-		"--here"
+		"--here",
+		"--local"
 	],
 	"shells": {
 		"bash": {

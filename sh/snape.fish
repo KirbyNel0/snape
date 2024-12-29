@@ -27,7 +27,7 @@ if [ -z "$SNAPE_LOCAL_VENV" ]
 end
 
 set SNAPE_SCRIPT (realpath (dirname (status current-filename))/../snape/run.py)
-set SNAPE_SCRIPT_CMD "help --help -h new touch delete rm list setup status possess attach detach clean"
+set SNAPE_SCRIPT_CMD "help --help -h new touch delete rm env setup status possess attach detach clean"
 
 function snape
 	mkdir -p "$SNAPE_ROOT"
@@ -67,7 +67,7 @@ function snape
 	# Environment given which should be activated
 	if [ (count $argv) -eq 1 ]
 		# Manage local environment
-		if [ "$argv[1]" = "here" -o "$argv[1]" = "--here" ]
+		if [ "$argv[1]" = "here" -o "$argv[1]" = "--here" -o "$argv[1]" = "--local" ]
 			# Environment is active, deactivate
 			if [ -n "$VIRTUAL_ENV" ]
 				deactivate

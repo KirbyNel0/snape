@@ -13,7 +13,7 @@ __all__ = [
 
 
 def snape_clean(
-        no_ask: bool,
+        do_ask: bool,
         here: bool
 ):
     if here:
@@ -22,7 +22,7 @@ def snape_clean(
         if is_venv(local_venv):
             info("Nothing to do")
         else:
-            if no_ask or ask("Remove broken local environment?", default=True):
+            if (not do_ask) or ask("Remove broken local environment?", default=True):
                 log("Removing directory", local_venv)
                 shutil.rmtree(local_venv)
         return
@@ -44,7 +44,7 @@ def snape_clean(
     for other_file in other_files:
         info("   >", other_file.name, "[dir]" if other_file.is_dir() else "[file]")
 
-    if no_ask or ask("Do you want to delete all files that are no valid global environments?", default=True):
+    if (not do_ask) or ask("Do you want to delete all files that are no valid global environments?", default=True):
         for other_file in other_files:
             if other_file.is_file():
                 log("Removing file", other_file)
@@ -69,6 +69,6 @@ snape_clean_parser.add_argument(
 snape_clean_parser.add_argument(
     "-n", "--no-ask",
     help="do not ask before deleting unclassified files",
-    action="store_true", default=False, dest="no_ask"
+    action="store_false", default=True, dest="do_ask"
 )
 snape_clean_parser.set_defaults(func=snape_clean)

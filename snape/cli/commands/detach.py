@@ -14,10 +14,10 @@ def snape_detach(
         here: bool,
         global_name: str | None,
         overwrite: bool,
-        no_update: bool,
+        do_update: bool,
         delete_old: bool,
         requirements_quiet: bool,
-        no_ask: bool,
+        do_ask: bool,
         ignore_active: bool
 ):
     old_venv_path = get_snape_venv_path(global_name, here)
@@ -38,13 +38,13 @@ def snape_detach(
     if len(packages) == 0:
         info(f"Note: No additional packages were installed in '{old_venv.name}'")
 
-    new_venv = create_new_snape_venv(new_venv_path, overwrite, not no_update)
+    new_venv = create_new_snape_venv(new_venv_path, overwrite, do_update)
 
     if not install_packages(new_venv, packages, requirements_quiet):
         raise RuntimeError("Could not install all packages")
 
     if delete_old:
-        delete_snape_venv(old_venv, no_ask, ignore_active)
+        delete_snape_venv(old_venv, do_ask, ignore_active)
 
 
 snape_detach_parser = subcommands.add_parser(
@@ -54,19 +54,19 @@ snape_detach_parser = subcommands.add_parser(
     help="copy any snape-managed environment to a new environment"
 )
 snape_detach_parser.add_argument(
-    "path",
+    "global_name", nargs="?",
+    help="the name of the global environment to detach",
+    action="store", default=None, metavar="env"
+)
+snape_detach_parser.add_argument(
+    "->", "--to",
     help="the path to the new environment",
-    action="store", metavar="new-env-path"
+    action="store", dest="path", metavar="PATH", required=True
 )
 snape_detach_parser.add_argument(
     "-l", "--local", "--here",
-    help="detach a local environment. it is not allowed to provide -g.",
+    help="detach a local environment. it is not allowed to provide 'env'.",
     action="store_true", default=False, dest="here"
-)
-snape_detach_parser.add_argument(
-    "-g", "--global-name",
-    help="the name of the global environment to detach",
-    action="store", default=None, dest="global_name", metavar="ENV"
 )
 snape_detach_parser.set_defaults(func=snape_detach)
 
@@ -79,7 +79,7 @@ snape_detach_parser_new_env.add_argument(
 snape_detach_parser_new_env.add_argument(
     "-n", "--no-update",
     help="do not update pip after initializing the new environment",
-    action="store_true", default=False, dest="no_update"
+    action="store_false", default=False, dest="do_update"
 )
 snape_detach_parser_new_env.add_argument(
     "-q", "--quiet",
@@ -102,5 +102,5 @@ snape_detach_parser_old_env.add_argument(
 snape_detach_parser_old_env.add_argument(
     "-a", "--no-ask",
     help="do not prompt before deleting the old environment (with -d)",
-    action="store_true", default=False, dest="no_ask"
+    action="store_false", default=True, dest="do_ask"
 )
