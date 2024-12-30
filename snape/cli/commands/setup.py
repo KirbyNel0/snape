@@ -1,3 +1,4 @@
+import argparse
 import shutil
 from pathlib import Path
 
@@ -36,7 +37,7 @@ def snape_setup_init() -> None:
     """
     # Get shell-dependent arguments
     shell = SHELLS[env_var.SHELL]
-    snape_shell_script: Path = env_var.SNAPE_REPO_PATH / "sh" / f"snape.{env_var.SHELL}"
+    snape_shell_script: Path = env_var.SNAPE_REPO_PATH / "init" / f"snape.{env_var.SHELL}"
     init_file: Path = absolute_path(shell["init_file"])
     source_line: str = f"source '{snape_shell_script}'"
     # Only used by is_venv function: activate_file = shell["activate_file"]
@@ -70,8 +71,12 @@ def snape_setup_init() -> None:
 
 snape_setup_init_parser = snape_setup_subcommands.add_parser(
     "init",
-    description="Initialize the snape installation.",
-    help="initialize the snape installation"
+    description=
+    """\
+  Initialize the snape installation.\
+    """,
+    help="initialize the snape installation",
+    formatter_class=argparse.RawDescriptionHelpFormatter
 )
 snape_setup_init_parser.set_defaults(func=snape_setup_init)
 
@@ -87,7 +92,7 @@ def snape_setup_remove(
 
     # Get shell-dependent arguments
     shell = SHELLS[env_var.SHELL]
-    snape_shell_script: Path = env_var.SNAPE_REPO_PATH / "sh" / f"snape.{env_var.SHELL}"
+    snape_shell_script: Path = env_var.SNAPE_REPO_PATH / "init" / f"snape.{env_var.SHELL}"
     init_file: Path = absolute_path(shell["init_file"])
     source_line: str = f"source '{snape_shell_script}'"
     # Only used by is_venv function: activate_file = shell["activate_file"]
@@ -135,8 +140,12 @@ def snape_setup_remove(
 
 snape_setup_remove_parser = snape_setup_subcommands.add_parser(
     "remove",
-    description="Remove the snape installation",
-    help="remove the snape installation"
+    description=
+    """\
+  Remove the snape installation.
+    """,
+    help="remove the snape installation",
+    formatter_class=argparse.RawDescriptionHelpFormatter
 )
 snape_setup_remove_parser.add_argument(
     "-a", "--all",

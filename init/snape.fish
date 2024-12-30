@@ -15,7 +15,7 @@ if ! "$SNAPE_PYTHON" -c "import venv" >/dev/null 2>&1
 end
 
 if [ -z "$SNAPE_ROOT" ]
-	set -x SNAPE_ROOT "$HOME/.snape"
+	set -x SNAPE_ROOT $HOME/.snape
 end
 
 if [ -z "$SNAPE_VENV" ]
@@ -23,7 +23,7 @@ if [ -z "$SNAPE_VENV" ]
 end
 
 if [ -z "$SNAPE_LOCAL_VENV" ]
-	set -x SNAPE_LOCAL_VENV .venv
+	set -x SNAPE_LOCAL_VENV .snape
 end
 
 set SNAPE_SCRIPT (realpath (dirname (status current-filename))/../snape/run.py)

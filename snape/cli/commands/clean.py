@@ -1,3 +1,4 @@
+import argparse
 import os
 import shutil
 from pathlib import Path
@@ -58,8 +59,16 @@ def snape_clean(
 
 snape_clean_parser = subcommands.add_parser(
     "clean",
-    description="Delete unclassified files in the snape root directory\nwhich are no valid snape environments.",
-    help="delete unclassified global environments"
+    description=
+    """\
+  Delete files in the snape root directory which are no valid snape environments.
+  Using the --local flag, a local environment can be checked for its validity.
+
+  An environment is considered valid if it contains a python executable and an activation script.
+  An environment is also invalid if it points to a single file instead of a directory.\
+    """,
+    help="delete unclassified global environments",
+    formatter_class=argparse.RawDescriptionHelpFormatter
 )
 snape_clean_parser.add_argument(
     "-l", "--local", "--here",

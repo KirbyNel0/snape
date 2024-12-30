@@ -3,7 +3,7 @@
 Snape is a shell-python wrapper for the [`venv`](https://docs.python.org/3/library/venv.html) package to manage python virtual environments (aka. venvs) easily.
 Of course, the name comes from the awesome Harry Potter universe.
 
-Snape can manage environments for a single project (called *local* venvs) or for your whole system (called *global venvs*).
+Snape can manage environments for a single project (called *local* venvs) or for your whole system (called *global* venvs).
 It can
 
 - (de)activate environments
@@ -38,8 +38,22 @@ If you want to install snape manually, put the following line into your shell in
 where `~/.local/snape` is the path to the snape repository and `SHELL` is your shell (e.g. `bash`):
 
 ```shell
-source "~/.local/snape/sh/snape.SHELL"
+source "~/.local/snape/init/snape.SHELL"
 ```
+
+Manual installation is not guaranteed to be detected by the `snape setup` command.
+
+## Usage
+
+After installation, `snape` is available as a shell function.
+To list all available commands, run
+
+```shell
+snape help
+```
+
+Snape defines a very basic autocompletion for the `bash` shell.
+It will autocomplete basic commands and existing environments.
 
 ## Remove snape
 
@@ -52,13 +66,4 @@ rm -r ~/.local/snape
 
 If you installed snape for multiple shells, be sure to remove snape for all those shells using `snape -s`.
 
-## Usage
-
-After installation, `snape` is available as a normal shell command. To list all available commands, run
-
-```shell
-snape help
-```
-
-Currently, snape supports autocompletion for the `bash` shell. It will autocomplete basic commands and available
-environments which can be activated.
+If you installed snape manually, remove the line from your initialization file and remove snape's global venv directory and the repository.

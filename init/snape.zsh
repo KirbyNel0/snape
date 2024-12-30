@@ -23,7 +23,7 @@ if [ -z "$SNAPE_VENV" ]; then
 fi
 
 if [ -z "$SNAPE_LOCAL_VENV" ]; then
-	export SNAPE_LOCAL_VENV=".venv"
+	export SNAPE_LOCAL_VENV=".snape"
 fi
 # Only without compatibility mode!
 SNAPE_SCRIPT=$(realpath "$(dirname "$0")/../snape/run.py")

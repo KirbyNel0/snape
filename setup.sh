@@ -49,4 +49,4 @@ then
 	exit 3
 fi
 
-"$SNAPE_PYTHON" snape/run.py "$SNAPE_OPT" -s "$SNAPE_SHELL" setup init
+"$SNAPE_PYTHON" snape/run.py $SNAPE_OPT -s "$SNAPE_SHELL" setup init

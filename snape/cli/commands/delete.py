@@ -1,3 +1,5 @@
+import argparse
+
 from snape.cli._parser import subcommands
 from snape.util import log
 from snape.virtualenv import ensure_venv, delete_snape_venv
@@ -39,7 +41,25 @@ def snape_delete(
 
 
 # The subcommand parser for ``snape delete``.
-snape_delete_parser = subcommands.add_parser("delete", help="delete an existing environment", aliases=["rm"])
+snape_delete_parser = subcommands.add_parser(
+    "delete", aliases=["rm"],
+    description=
+    """\
+  Delete a snape-managed environment.
+
+  To delete a global environment, its name must be provided.
+  To delete a local environment, specify --local as name.
+
+  To list all existing environments, use snape status.
+  To delete invalid environments, use snape clean.
+
+example:
+  To delete a global environment named MY_VENV, call
+    snape delete MY_VENV\
+    """,
+    help="delete an existing environment",
+    formatter_class=argparse.RawDescriptionHelpFormatter
+)
 # The name of the environment to delete
 snape_delete_parser.add_argument(
     "env", nargs="?",

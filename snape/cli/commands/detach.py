@@ -1,6 +1,9 @@
+import argparse
+
+from snape.annotations import SnapeCancel
 from snape.cli._parser import subcommands
 
-from snape.util import absolute_path, log, info
+from snape.util import absolute_path, log, info, ask
 from snape.virtualenv import get_snape_venv_path, ensure_venv, get_venv_packages, create_new_snape_venv, \
     install_packages, delete_snape_venv
 
@@ -38,6 +41,11 @@ def snape_detach(
     if len(packages) == 0:
         info(f"Note: No additional packages were installed in '{old_venv.name}'")
 
+    locality = "local" if here else "global"
+    question = f"Do you want to create a new environment named '{new_venv_path.name}' with the requirements of the {locality} snape environment '{old_venv_path.name}'?"
+    if do_ask and not ask(question, default=True):
+        raise SnapeCancel()
+
     new_venv = create_new_snape_venv(new_venv_path, overwrite, do_update)
 
     if not install_packages(new_venv, packages, requirements_quiet):
@@ -49,9 +57,19 @@ def snape_detach(
 
 snape_detach_parser = subcommands.add_parser(
     "detach",
-    description="Create a new local environment not managed by snape.\n"
-                "Snape will create a new environment with a given name and install all packages from a given snape-managed venv into it.",
-    help="copy any snape-managed environment to a new environment"
+    description=
+    """\
+  Create a new local environment not managed by snape.
+
+  Snape will create a new environment with a given name and install all packages from a given snape-managed venv into it.
+  It has the same behavior for creation and deletion of environments as the new and delete subcommands.
+
+example:
+  To copy the snape-managed environment MY_SNAPE to a new environment called MY_VENV, run the following command:
+    snape detach MY_SNAPE --as MY_VENV\
+    """,
+    help="copy any snape-managed environment to a new environment",
+    formatter_class=argparse.RawDescriptionHelpFormatter
 )
 snape_detach_parser.add_argument(
     "global_name", nargs="?",
@@ -59,7 +77,7 @@ snape_detach_parser.add_argument(
     action="store", default=None, metavar="env"
 )
 snape_detach_parser.add_argument(
-    "->", "--to",
+    "--as",
     help="the path to the new environment",
     action="store", dest="path", metavar="PATH", required=True
 )

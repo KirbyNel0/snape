@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 
 from snape.cli._parser import subcommands
@@ -50,7 +51,25 @@ def snape_new(
 
 
 # The subcommand parser for ``snape new``.
-snape_new_parser = subcommands.add_parser("new", help="create a new environment", aliases=["touch"])
+snape_new_parser = subcommands.add_parser(
+    "new",
+    description=
+    """\
+  Create new snape-managed environments.
+
+  To create a new global environment, use snape new MY_VENV.
+  To create a new local environment, use snape new --local.
+
+  An existing environment can be overwritten with this command.
+  This can only be done if it is a valid environment, meaning not a simple directory or file.
+
+example:
+  To create a global environment and name it MY_VENV, call
+    snape new MY_VENV\
+    """,
+    help="create a new environment",
+    formatter_class=argparse.RawDescriptionHelpFormatter
+)
 # The name of the new environment
 snape_new_parser.add_argument(
     "env", nargs="?",

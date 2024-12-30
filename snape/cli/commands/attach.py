@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 
 from snape import env_var
@@ -72,9 +73,19 @@ def snape_attach(
 # The subcommand parser for ``snape attach``.
 snape_attach_parser = subcommands.add_parser(
     "attach", aliases=["possess"],
-    description="Make a local environment available to snape.\n"
-                "Snape will create a new environment it can manage and install all packages from the old venv into it.",
-    help="copy any local environment to a snape-managed environment"
+    description=
+    """\
+  Make a local environment available to snape.
+
+  Snape will create a new environment it can manage and install all packages from the old venv into it.
+  It has the same behavior for creation and deletion of environments as the new and delete subcommands.
+    
+example:
+  To make the environment MY_VENV available to snape globally and name it MY_SNAPE, run the following command:
+    snape attach MY_VENV --as MY_SNAPE\
+    """,
+    help="copy any local environment to a snape-managed environment",
+    formatter_class=argparse.RawDescriptionHelpFormatter
 )
 # The name of the environment to manage
 snape_attach_parser.add_argument(
@@ -93,7 +104,7 @@ snape_attach_parser_new_env.add_argument(
 )
 # A new name for the new global environment
 snape_attach_parser_new_env.add_argument(
-    "->", "--global-name",
+    "--as",
     help="give the new environment an other name. without this, it will have the same name as the old environment.",
     action="store", default=None, dest="global_name", metavar="NAME"
 )

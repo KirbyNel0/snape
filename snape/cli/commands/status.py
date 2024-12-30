@@ -1,3 +1,4 @@
+import argparse
 import json
 from pathlib import Path
 
@@ -76,8 +77,12 @@ Local snape environments:
 # The subcommand parser for ``snape status``
 snape_status_parser = subcommands.add_parser(
     "status",
-    description="List information on the current snape status.",
-    help="list information on the current snape status"
+    description=
+    """\
+  List information on the current status of all virtual environments known to snape.\
+    """,
+    help="list information on the current status of snape",
+    formatter_class=argparse.RawDescriptionHelpFormatter
 )
 # Whether to print out as json
 snape_status_parser.add_argument(

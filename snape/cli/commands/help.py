@@ -1,3 +1,4 @@
+import argparse
 import sys
 
 from snape.cli._parser import parser, subcommands
@@ -31,8 +32,15 @@ def snape_help(
 # The subcommand parser for ``snape help``.
 snape_help_parser = subcommands.add_parser(
     "help",
-    description="Print snape's default help",
+    description=
+    """\
+  Print help on snape and its subcommands.
+
+  By default, this command has the same behavior as snape --help.
+  By specifying one or multiple subcommands of snape, the help of those subcommands will be printed.\
+    """,
     help="print this help and exit",
+    formatter_class=argparse.RawDescriptionHelpFormatter
 )
 snape_help_parser.add_argument(
     "cmd", nargs="*",

@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env ksh
 
-if ! (return 0 2>/dev/null); then
+if ! [[ "$(cd -- "$(dirname -- "$0")" && pwd -P)/$(basename -- "$0")" != "$(cd -- "$(dirname -- "${.sh.file}")" && pwd -P)/$(basename -- "${.sh.file}")" ]]; then
 	echo "snape: The initialization script must be sourced to work properly" 1>&2
 	return 100
 fi
@@ -23,13 +23,13 @@ if [ -z "$SNAPE_VENV" ]; then
 fi
 
 if [ -z "$SNAPE_LOCAL_VENV" ]; then
-	export SNAPE_LOCAL_VENV=".venv"
+	export SNAPE_LOCAL_VENV=".snape"
 fi
 
-SNAPE_SCRIPT=$(realpath "$(dirname "${BASH_SOURCE[0]}")/../snape/run.py")
+SNAPE_SCRIPT=$(realpath "$(dirname "${.sh.file}")/../snape/run.py")
 SNAPE_SCRIPT_CMD="help --help -h new touch delete rm env setup status possess attach detach clean"
 
-function snape() {
+function snape {
 	mkdir -p "$SNAPE_ROOT"
 
 	if ! test -d "$SNAPE_ROOT"; then
@@ -104,35 +104,3 @@ function snape() {
 	# anything else is passed to the python script
 	"$SNAPE_PYTHON" "$SNAPE_SCRIPT" "$@"
 }
-
-function _snape_autocomplete() {
-	# If not autocompleting the first argument, default to file autocompletion
-	if [ "$COMP_CWORD" -ne 1 ]; then
-		COMPREPLY=($(compgen -A file -- "${COMP_WORDS[$COMP_CWORD]}"))
-		return
-	fi
-
-	local ENVS=()
-
-	# Check for existing global environments
-	for ENV in $(ls "$SNAPE_ROOT")
-	do
-		local SNAPE_ENV="${SNAPE_ROOT%/}/$ENV"
-		if [ -d "$SNAPE_ENV" -a -f "$SNAPE_ENV/bin/activate" -a -f "$SNAPE_ENV/bin/python" ]; then
-			ENVS+=("$ENV")
-		fi
-	done
-
-	# Check for local environment
-	if [ -d "$SNAPE_LOCAL_VENV" ]; then
-		ENVS+=("--local")
-	fi
-
-	# autocomplete commands
-	ENVS+=($SNAPE_SCRIPT_CMD)
-
-	# Complete with all found environments
-	COMPREPLY+=($(compgen -W "${ENVS[*]}" -- "${COMP_WORDS[1]}"))
-}
-
-complete -F _snape_autocomplete snape

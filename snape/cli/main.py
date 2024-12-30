@@ -13,11 +13,18 @@ __all__ = [
 
 def main() -> None:
     """
-    Parses all arguments and applies the shell to use (``SHELL`` variable). Afterward, runs the function of a given
-    subcommand.
+    Runs snape's command line interface (cli).
 
-    This function will modify objects from other modules to apply certain command line arguments. For example, if
-    the user requests a quiet execution, the ``snape.util.info`` function will be redefined to not produce any output.
+    All arguments passed to the script will be parsed and passed to the subcommand's function as keyword arguments.
+    The keys are the attribute names of the ``argparse.Namespace`` object created by ``argparse``. All keys only
+    used by snape and not the subcommand are removed. A subcommand may therefor not expect the following names as
+    arguments: ``shell``, ``func``, ``quiet``, ``verbose``, ``global-env``, ``local-env``.
+
+    On how to set up a subcommand, see ``snape.cli._parser.subcommands``.
+
+    This function will modify objects from other modules to apply certain command line arguments:
+    - The selected shell is saved inside the ``env_var.SHELL`` variable
+    - The -v and -q options utilize the ``snape.util.io.toggle_io`` method
 
     This function will continue raising all exceptions each subcommand would raise. Therefor, they must be caught by
     a calling instance.
@@ -30,7 +37,7 @@ def main() -> None:
         env_var.__VARS__["SHELL"] = args.shell
 
     if env_var.SHELL not in SHELLS:
-        raise KeyError(f"Snape does not support the shell '{env_var.SHELL}' yet")
+        raise KeyError(f"Snape does not support the '{env_var.SHELL}' shell yet")
     log("Enabled shell:", env_var.SHELL)
 
     # Ensure the root directory exists, except when snape is initialized for the first time

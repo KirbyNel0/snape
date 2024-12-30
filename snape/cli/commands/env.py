@@ -1,3 +1,4 @@
+import argparse
 import json
 from typing import Any
 
@@ -81,8 +82,15 @@ def snape_env(
 
 snape_list_parser = subcommands.add_parser(
     "env",
-    description="List all information on a single environment",
-    help="list information on a snape environment"
+    description=
+    """\
+  List information on a single environment.
+
+  By default, list information on the environment which is currently active.
+  If a snape-managed environment is specified, list information on that environment (see env parameter).\
+    """,
+    help="list information on a snape environment",
+    formatter_class=argparse.RawDescriptionHelpFormatter
 )
 snape_list_parser.add_argument(
     "env", nargs="?",
