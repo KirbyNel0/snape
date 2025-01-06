@@ -7,7 +7,7 @@ from snape.cli._parser import subcommands
 from snape.util import log, absolute_path
 from snape.util.path import get_dir_size
 from snape.virtualenv import get_snape_venv_path, get_venv_packages, ensure_venv, is_active_venv, is_venv
-from snape.virtualenv.internal import is_global_snape_venv_path
+from snape.virtualenv.internal import is_global_snape_venv_path, get_snape_venv_name
 
 
 def snape_env(
@@ -44,7 +44,7 @@ def snape_env(
         venv_path = get_snape_venv_path(env, here)
 
     venv = ensure_venv(venv_path)
-    add_info("name", "Name", venv.name)
+    add_info("name", "Name", get_snape_venv_name(venv))
 
     # Global information
     is_global = is_global_snape_venv_path(venv)
@@ -63,7 +63,7 @@ def snape_env(
     if env_var.SNAPE_VENV == venv.name and is_global:
         activate_command = "snape"
     else:
-        activate_command = venv.name if is_global else "--here"
+        activate_command = get_snape_venv_name(venv) if is_global else "--here"
         activate_command = f"snape {activate_command}"
     add_info("activate_command", "Command", activate_command)
 

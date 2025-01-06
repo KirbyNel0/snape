@@ -6,7 +6,7 @@ from snape.annotations import SnapeCancel
 from snape.cli._parser import subcommands
 from snape.util import log, info, ask
 from snape.virtualenv import ensure_venv, get_snape_venv_path, get_venv_packages, create_new_snape_venv, \
-    install_packages, delete_snape_venv
+    install_packages, delete_snape_venv, get_snape_venv_name
 
 __all__ = [
     "snape_attach"
@@ -51,11 +51,11 @@ def snape_attach(
 
     packages = get_venv_packages(old_venv)
     if len(packages) == 0:
-        info(f"Note: No additional packages were installed in '{env}'")
+        info(f"Note: No additional packages were installed in '{get_snape_venv_name(old_venv)}'")
 
     # Create output and prompt
     locality = "local" if here else "global"
-    question = f"Do you want to create a new {locality} environment named '{new_venv_path.name}' with the requirements of '{env}'?"
+    question = f"Do you want to create a new {locality} environment named '{get_snape_venv_name(new_venv_path)}' with the requirements of '{get_snape_venv_name(old_venv)}'?"
     if do_ask and not ask(question, default=True):
         raise SnapeCancel()
 

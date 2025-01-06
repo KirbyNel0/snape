@@ -6,7 +6,7 @@ from snape import env_var
 from snape.cli._parser import subcommands
 from snape.util import absolute_path
 from snape.util import log
-from snape.virtualenv import get_global_snape_venvs, is_venv
+from snape.virtualenv import get_global_snape_venvs, is_venv, get_snape_venv_name
 
 __all__ = [
     "snape_status"
@@ -51,9 +51,9 @@ def snape_status(
 
     snape_envs_str = []
     for env in snape_envs:
-        prefix = "  \033[32m*\033[0m" if env.name == snape_env else "  *"
-        suffix = "(default)" if env == snape_default else ""
-        snape_envs_str.append(f"{prefix} {env.name} {suffix}")
+        prefix = "  \033[32m*\033[0m" if str(env) == python_venv else "  *"
+        suffix = "(default)" if env.name == snape_default else ""
+        snape_envs_str.append(f"{prefix} {get_snape_venv_name(env)} {suffix}")
 
     local_status = ("active" if local_active else "inactive") if local_exists else "not found"
 
@@ -62,6 +62,7 @@ def snape_status(
         f"""\
 Python venv:
     Current:       {python_venv}
+    Snape name:    {get_snape_venv_name(python_venv) if python_venv is not None else None}
 
 Global snape environments:
     Snape root:    {snape_dir}

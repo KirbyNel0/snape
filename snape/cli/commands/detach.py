@@ -5,7 +5,7 @@ from snape.cli._parser import subcommands
 
 from snape.util import absolute_path, log, info, ask
 from snape.virtualenv import get_snape_venv_path, ensure_venv, get_venv_packages, create_new_snape_venv, \
-    install_packages, delete_snape_venv
+    install_packages, delete_snape_venv, get_snape_venv_name
 
 __all__ = [
     "snape_detach"
@@ -39,10 +39,10 @@ def snape_detach(
 
     packages = get_venv_packages(old_venv)
     if len(packages) == 0:
-        info(f"Note: No additional packages were installed in '{old_venv.name}'")
+        info(f"Note: No additional packages were installed in '{get_snape_venv_name(old_venv)}'")
 
     locality = "local" if here else "global"
-    question = f"Do you want to create a new environment named '{new_venv_path.name}' with the requirements of the {locality} snape environment '{old_venv_path.name}'?"
+    question = f"Do you want to create a new environment named '{get_snape_venv_name(new_venv_path)}' with the requirements of the {locality} snape environment '{get_snape_venv_name(old_venv_path)}'?"
     if do_ask and not ask(question, default=True):
         raise SnapeCancel()
 

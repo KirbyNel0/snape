@@ -14,6 +14,7 @@ __all__ = [
     "is_global_snape_venv_path",
     "is_global_snape_venv",
     "get_snape_venv_path",
+    "get_snape_venv_name",
     "create_new_snape_venv",
     "delete_snape_venv",
     "get_global_snape_venvs"
@@ -29,7 +30,7 @@ def is_global_snape_venv_path(env: Path, check_exists: bool = True) -> bool:
         Otherwise, the path contents will only be compared.
     :return: Whether ``env`` is a child directory of ``SNAPE_DIR``.
     """
-    return absolute_path(env.parent) == env_var.SNAPE_ROOT_PATH and ((not check_exists) or env.is_dir())
+    return env_var.SNAPE_ROOT_PATH in absolute_path(env).parents and ((not check_exists) or env.is_dir())
 
 
 def is_global_snape_venv(env: VirtualEnv | Path) -> bool:
@@ -70,6 +71,37 @@ def get_snape_venv_path(name: str | None, local: bool, warn_argument_conflicts: 
     return absolute_path(env_var.SNAPE_ROOT_PATH / name)
 
 
+def get_snape_venv_name(env: str | Path | VirtualEnv) -> str | None:
+    """
+    Evaluates the snape-recognized name of a virtual environment.
+    The name is all path components from snape's root directory separated by slashes.
+    For local environments, returns None if not managed by snape or the default local venv name.
+    
+    :param env: The environment whose name should be evaluated
+    :return: `None` if the path points to an environment not managed by snape, its name otherwise.
+    """
+    if env is None:
+        return None
+    
+    env = absolute_path(env)
+    
+    if is_global_snape_venv_path(env, check_exists=False):
+        venv = env
+        result = []
+        
+        while venv.parent != env_var.SNAPE_ROOT_PATH:
+            result.append(venv.name)
+            venv = venv.parent
+        
+        if venv.parent is None:
+            return None
+        
+        result.append(venv.name)
+        return "/".join(reversed(result))
+    
+    return env.name if env.name == env_var.SNAPE_LOCAL_VENV else None
+
+
 def create_new_snape_venv(env: Path, overwrite: bool | None, autoupdate: bool) -> VirtualEnv | None:
     """
     Creates a new snape environment at the specified path. If the directory exists and is not a venv, an error is
@@ -85,6 +117,8 @@ def create_new_snape_venv(env: Path, overwrite: bool | None, autoupdate: bool) -
     :exception IsADirectoryError: Raised if the specified path exists and is not a venv which could be overwritten.
     :exception NotADirectoryError: Raised if the specified path exists and points to a file.
     """
+    venv_name = get_snape_venv_name(env)
+
     if env.name in FORBIDDEN_ENV_NAMES:
         raise NameError("Illegal snape venv name: " + env.name)
 
@@ -98,12 +132,12 @@ def create_new_snape_venv(env: Path, overwrite: bool | None, autoupdate: bool) -
             )
 
         if overwrite is None:
-            if not ask(f"Environment '{env.name}' does already exist. Overwrite?", False):
+            if not ask(f"Environment '{venv_name}' does already exist. Overwrite?", False):
                 return None
             overwrite = True
 
     locality = "global" if is_global_snape_venv_path(env, check_exists=False) else "local"
-    info(f"Creating {locality} snape environment:", env.name)
+    info(f"Creating {locality} snape environment:", venv_name)
     log("Creating virtual environment at", env)
     python_venv.create(env, with_pip=True, clear=overwrite, upgrade_deps=autoupdate)
     return cast(VirtualEnv, absolute_path(env))
@@ -119,11 +153,13 @@ def delete_snape_venv(env: VirtualEnv, do_ask: bool, ignore_active: bool) -> Non
     :exception RuntimeError: Raised if the environment is active and ``ignore_active`` is ``False``.
     :exception SystemError: Raised if the environment could not be deleted.
     """
+    venv_name = get_snape_venv_name(env)
+    
     if not ignore_active and is_active_venv(env):
-        raise RuntimeError(f"Environment {env.name} is currently active. Deactivate it before deletion.")
+        raise RuntimeError(f"Environment {venv_name} is currently active. Deactivate it before deletion.")
 
     locality = "global" if is_global_snape_venv(env) else "local"
-    if (not do_ask) or ask(f"Are you sure you want to delete the {locality} environment '{env.name}'?", False):
+    if (not do_ask) or ask(f"Are you sure you want to delete the {locality} environment '{venv_name}'?", False):
         shutil.rmtree(env)
     else:
         raise SnapeCancel()
@@ -131,7 +167,7 @@ def delete_snape_venv(env: VirtualEnv, do_ask: bool, ignore_active: bool) -> Non
     if env.is_dir():
         raise SystemError(f"Could not delete virtual environment: {env}")
 
-    info(f"Deleted {locality} snape environment", env.name)
+    info(f"Deleted {locality} snape environment", venv_name)
 
 
 def get_global_snape_venvs() -> list[VirtualEnv]:
@@ -140,8 +176,27 @@ def get_global_snape_venvs() -> list[VirtualEnv]:
 
     :return: A list of absolute paths to all global snape environments.
     """
-    return [
-        cast(VirtualEnv, env_var.SNAPE_ROOT_PATH / snape_venv)
-        for snape_venv in os.listdir(env_var.SNAPE_ROOT_PATH)
-        if is_venv(env_var.SNAPE_ROOT_PATH / snape_venv)
-    ]
+    return _get_environments(env_var.SNAPE_ROOT_PATH)
+    
+
+def _get_environments(root: Path) -> list[VirtualEnv]:
+    """
+    Lists all environments found inside `root` and its nested directories (recursively).
+
+    :param root: The directory to scan for snape venvs
+    :return: A list of all found environments in `root` and its nested directories as
+        absolute paths.
+    """
+    result = []
+
+    if not root.is_dir():
+        return []
+
+    for env in os.listdir(root):
+        full_path = root / env
+        if (is_venv(full_path)):
+            result.append(cast(VirtualEnv, full_path))
+        elif full_path.is_dir():
+            result.extend(_get_environments(full_path))
+    return result
+    

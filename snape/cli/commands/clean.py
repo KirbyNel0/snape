@@ -20,7 +20,9 @@ def snape_clean(
     if here:
         log("Collecting unknown files at", Path.cwd())
         local_venv = get_snape_venv_path(None, True)
-        if is_venv(local_venv):
+        if not local_venv.is_dir():
+            info("No local environment found")
+        elif is_venv(local_venv):
             info("Nothing to do")
         else:
             if (not do_ask) or ask("Remove broken local environment?", default=True):
@@ -31,8 +33,15 @@ def snape_clean(
     log("Collecting unknown files at", env_var.SNAPE_ROOT)
     global_venv_files = list(map(lambda env: env_var.SNAPE_ROOT_PATH / env, os.listdir(env_var.SNAPE_ROOT_PATH)))
     global_venvs = get_global_snape_venvs()
-    other_files = list(set(global_venv_files) - set(global_venvs))
-    log("Unknown files:", ", ".join(map(str, other_files)))
+    no_venvs = list(set(global_venv_files) - set(global_venvs))
+    log("No venvs:", [*map(str, no_venvs)])
+    other_files = []
+    for other_file in no_venvs:
+        if any(other_file in global_venv.parents for global_venv in global_venvs):
+            log("Directory contains nested venvs:", other_file)
+            continue
+        other_files.append(other_file)
+    log("Unknown files:", [*map(str, other_files)])
 
     if len(other_files) == 0:
         info("Nothing to do")
