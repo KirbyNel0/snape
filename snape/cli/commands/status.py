@@ -1,6 +1,7 @@
 import argparse
 import json
 from pathlib import Path
+from typing import Any
 
 from snape import env_var
 from snape.cli._parser import subcommands
@@ -15,16 +16,15 @@ __all__ = [
 
 def snape_status(
         raw: bool
-) -> None:
+) -> dict[str, Any]:
     """
     Outputs information on the current venv and snape status.
 
     For argument documentation, see ``snape_status_parser``.
     """
-
+    # Assemble information
     local_venv = absolute_path(env_var.SNAPE_LOCAL_VENV)
 
-    # Construct information
     python_venv = env_var.VIRTUAL_ENV
     snape_env = env_var.VIRTUAL_ENV.split("/")[-1] if env_var.VIRTUAL_ENV else None
     if snape_env and snape_env != env_var.SNAPE_LOCAL_VENV and env_var.SNAPE_ROOT_PATH not in Path(python_venv).parents:
@@ -37,7 +37,7 @@ def snape_status(
     local_exists = bool(local_venv.is_dir() and is_venv(local_venv))
     local_default = env_var.SNAPE_LOCAL_VENV
 
-    # All variables constructed locally should be printed out
+    # All variables constructed locally should be printed out.
     # All functional objects must be removed from the output.
     status = locals()
     status.pop("raw")
@@ -47,7 +47,7 @@ def snape_status(
     if raw:
         # Print everything
         print(json.dumps(status, indent=4, default=str))
-        return
+        return status
 
     snape_envs_str = []
     for env in snape_envs:
@@ -73,6 +73,7 @@ Local snape environments:
     Directory:     {local_default}
     Status:        {local_status}"""
     )
+    return status
 
 
 # The subcommand parser for ``snape status``

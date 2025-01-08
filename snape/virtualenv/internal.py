@@ -140,6 +140,8 @@ def create_new_snape_venv(env: Path, overwrite: bool | None, autoupdate: bool) -
     info(f"Creating {locality} snape environment:", venv_name)
     log("Creating virtual environment at", env)
     python_venv.create(env, with_pip=True, clear=overwrite, upgrade_deps=autoupdate)
+    with open(env / ".gitignore", "w") as gitignore:
+        print("*", file=gitignore)
     return cast(VirtualEnv, absolute_path(env))
 
 

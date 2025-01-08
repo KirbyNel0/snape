@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 
-def main() -> None:
+def main(args: list[str] | None = None) -> None:
     """
     Runs snape's command line interface (cli).
 
@@ -27,9 +27,11 @@ def main() -> None:
     - The -v and -q options utilize the ``snape.util.io.toggle_io`` method
 
     This function will continue raising all exceptions each subcommand would raise. Therefor, they must be caught by
-    a calling instance.
+    a calling instance. When calling, consider applying the special meaning of ``snape.annotations.SnapeCancel``.
+
+    :param args: If ``None``, parses the command line arguments (``sys.argv``), the specified arguments otherwise.
     """
-    args = parser.parse_args()
+    args = parser.parse_args(args=args)
 
     toggle_io(informational=not args.quiet, debug=args.verbose)
 

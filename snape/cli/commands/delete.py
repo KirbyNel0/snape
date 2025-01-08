@@ -1,7 +1,9 @@
 import argparse
+from pathlib import Path
 
+from snape.annotations import SnapeCancel
 from snape.cli._parser import subcommands
-from snape.util import log
+from snape.util import log, info
 from snape.virtualenv import ensure_venv, delete_snape_venv
 from snape.virtualenv.internal import get_snape_venv_path
 
@@ -11,33 +13,46 @@ __all__ = [
 
 
 def snape_delete(
-        env: str | None,
+        envs: list[str],
         ignore_not_exists: bool,
         here: bool,
         do_ask: bool,
         ignore_active: bool
-) -> None:
+) -> list[Path]:
     """
     Delete a existing global or local snape environments.
 
     For argument documentation, see ``snape_delete_parser``.
+
+    :return: A list of all deleted environment paths.
     """
-    if here and env is not None:
-        raise ValueError("snape delete --here: Cannot provide an environment name")
+    if len(envs) == 0 and not here:
+        raise ValueError("No snape environments specified")
 
-    old_venv_path = get_snape_venv_path(env, here)
+    old_venv_paths = [*map(lambda x: get_snape_venv_path(x, False), envs)]
 
-    log("Directory of old venv:", old_venv_path)
+    if here:
+        old_venv_paths.append(get_snape_venv_path(name=None, local=True))
 
-    try:
-        old_venv = ensure_venv(old_venv_path)
-    except Exception as e:
-        if ignore_not_exists:
-            return
-        else:
-            raise e
+    deleted_venvs = []
+    for old_venv_path in old_venv_paths:
+        log("Directory of old venv:", old_venv_path)
 
-    delete_snape_venv(old_venv, do_ask, ignore_active)
+        try:
+            old_venv = ensure_venv(old_venv_path)
+        except Exception as e:
+            if ignore_not_exists:
+                info("Virtual environment directory not found:", old_venv_path)
+                continue
+            else:
+                raise e
+        try:
+            delete_snape_venv(old_venv, do_ask, ignore_active)
+        except SnapeCancel:
+            continue
+        deleted_venvs.append(old_venv)
+
+    return deleted_venvs
 
 
 # The subcommand parser for ``snape delete``.
@@ -62,14 +77,14 @@ example:
 )
 # The name of the environment to delete
 snape_delete_parser.add_argument(
-    "env", nargs="?",
-    help="the name of the environment to delete",
-    action="store", default=None
+    "envs", nargs="*",
+    help="the names of the environments to delete",
+    action="store", default=[]
 )
 # If specified, a local environment will be deleted instead of a global one
 snape_delete_parser.add_argument(
     "-l", "--local", "--here",
-    help="remove the snape environment from the current directory. not allowed to provide 'env'.",
+    help="remove the snape environment from the current directory",
     action="store_true", default=False, dest="here"
 )
 snape_delete_parser.set_defaults(func=snape_delete)

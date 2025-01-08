@@ -13,7 +13,9 @@ def snape_help(
         cmd: list[str]
 ) -> None:
     """
-    Prints out help on snape. Same as ``snape --help``.
+    Print out help on snape.
+
+    For argument documentation, see ``snape_help_parser``.
     """
     if len(cmd) == 0:
         parser.print_help()

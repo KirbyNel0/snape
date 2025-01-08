@@ -26,7 +26,7 @@ if [ -z "$SNAPE_LOCAL_VENV" ]; then
 	export SNAPE_LOCAL_VENV=".snape"
 fi
 
-SNAPE_SCRIPT=$(realpath "$(dirname "${.sh.file}")/../snape/run.py")
+SNAPE_SCRIPT=$(realpath "$(dirname "${.sh.file}")/../run.py")
 SNAPE_SCRIPT_CMD="help --help -h new touch delete rm env setup status possess attach detach clean"
 
 function snape {

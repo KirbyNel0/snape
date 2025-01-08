@@ -31,9 +31,9 @@ snape_setup_parser.set_defaults(func=snape_setup)
 
 def snape_setup_init() -> None:
     """
-    Initialize the snape installation
+    Initialize the snape installation.
 
-    For argument documentation, see ``snape_setup_parser``.
+    For argument documentation, see ``snape_setup_init_parser``.
     """
     # Get shell-dependent arguments
     shell = SHELLS[env_var.SHELL]
@@ -85,11 +85,10 @@ def snape_setup_remove(
         argv: list[str]
 ) -> None:
     """
-    Undo snape initialization
+    Undo snape initialization.
 
-    For argument documentation, see ``snape_setup_remove``.
+    For argument documentation, see ``snape_setup_remove_parser``.
     """
-
     # Get shell-dependent arguments
     shell = SHELLS[env_var.SHELL]
     snape_shell_script: Path = env_var.SNAPE_REPO_PATH / "init" / f"snape.{env_var.SHELL}"

@@ -1,10 +1,11 @@
 import argparse
+import typing
 from pathlib import Path
-
+from snape.annotations import VirtualEnv
 from snape.cli._parser import subcommands
 from snape.util import log, info
 from snape.virtualenv import create_new_snape_venv, get_snape_venv_path, install_requirements, is_venv, \
-    get_venv_packages, install_packages, ensure_venv
+    get_venv_packages, install_packages
 
 __all__ = [
     "snape_new"
@@ -39,15 +40,15 @@ def snape_new(
         if requirements_path.is_file():
             requirements_source: Path = requirements_path
             log("Requirements file:", requirements_source)
+        elif is_venv(requirements_path):
+            # Must be a venv from here on
+            requirements_venv = typing.cast(VirtualEnv, requirements_path)
+            requirements_source: list[str] = get_venv_packages(requirements_venv)
+
+            if len(requirements_source) == 0:
+                info(f"Note: No additional packages were installed in {requirements_path}")
         else:
-            try:
-                # Must be a venv from here on
-                requirements_venv = ensure_venv(requirements_path)
-                requirements_source: list[str] = get_venv_packages(requirements_venv)
-                if len(requirements_source) == 0:
-                    info(f"Note: No additional packages were installed in {requirements_path}")
-            except NotADirectoryError | SystemError:
-                raise FileNotFoundError(f"Requirements file/venv not found: {requirements_path}")
+            raise FileNotFoundError(f"Requirements file/venv not found: {requirements_path}")
     else:
         requirements_source = None
 

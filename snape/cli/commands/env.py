@@ -9,6 +9,10 @@ from snape.util.path import get_dir_size
 from snape.virtualenv import get_snape_venv_path, get_venv_packages, ensure_venv, is_active_venv, is_venv
 from snape.virtualenv.internal import is_global_snape_venv_path, get_snape_venv_name
 
+__all__ = [
+    "snape_env"
+]
+
 
 def snape_env(
         env: str | None,
@@ -16,6 +20,11 @@ def snape_env(
         raw: bool,
         information: list[str],
 ):
+    """
+    Get information on the current venv or any snape environment.
+
+    For argument documentation, see ``snape_env_parser``.
+    """
     if raw:  # Assemble all information in an object
         raw_info = {}
 

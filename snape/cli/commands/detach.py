@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 
 from snape.annotations import SnapeCancel
 from snape.cli._parser import subcommands
@@ -22,37 +23,44 @@ def snape_detach(
         requirements_quiet: bool,
         do_ask: bool,
         ignore_active: bool
-):
-    old_venv_path = get_snape_venv_path(global_name, here)
-    old_venv = ensure_venv(old_venv_path)
-    log("Old environment path:", old_venv)
+) -> Path | None:
+    """
+    Create a virtual environment with the same packages as a selected snape environment.
 
-    new_venv_path = absolute_path(path)
-    log("New environment path:", new_venv_path)
+    For argument documentation, see ``snape_new_parser``.
+    """
+    snape_venv_path = get_snape_venv_path(global_name, here)
+    snape_venv = ensure_venv(snape_venv_path)
+    log("Old environment path:", snape_venv)
+
+    user_venv_path = absolute_path(path)
+    log("New environment path:", user_venv_path)
 
     # Check whether the new environment is the same as the old one
     # This can happen for local environments already having the correct name
-    if new_venv_path == old_venv_path:
+    if user_venv_path == snape_venv_path:
         log("New environment points to old name")
         info("Nothing to do")
-        return
+        return None
 
-    packages = get_venv_packages(old_venv)
+    packages = get_venv_packages(snape_venv)
     if len(packages) == 0:
-        info(f"Note: No additional packages were installed in '{get_snape_venv_name(old_venv)}'")
+        info(f"Note: No additional packages were installed in '{get_snape_venv_name(snape_venv)}'")
 
     locality = "local" if here else "global"
-    question = f"Do you want to create a new environment named '{get_snape_venv_name(new_venv_path)}' with the requirements of the {locality} snape environment '{get_snape_venv_name(old_venv_path)}'?"
+    question = f"Do you want to create a new environment named '{get_snape_venv_name(user_venv_path)}' with the requirements of the {locality} snape environment '{get_snape_venv_name(old_venv_path)}'?"
     if do_ask and not ask(question, default=True):
         raise SnapeCancel()
 
-    new_venv = create_new_snape_venv(new_venv_path, overwrite, do_update)
+    user_venv = create_new_snape_venv(user_venv_path, overwrite, do_update)
 
-    if not install_packages(new_venv, packages, requirements_quiet):
+    if not install_packages(user_venv, packages, requirements_quiet):
         raise RuntimeError("Could not install all packages")
 
     if delete_old:
-        delete_snape_venv(old_venv, do_ask, ignore_active)
+        delete_snape_venv(snape_venv, do_ask, ignore_active)
+
+    return user_venv
 
 
 snape_detach_parser = subcommands.add_parser(

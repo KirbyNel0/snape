@@ -3,6 +3,7 @@ import os
 import shutil
 from pathlib import Path
 
+from snape.annotations import SnapeCancel
 from snape import env_var
 from snape.cli._parser import subcommands
 from snape.util import ask, log, info
@@ -16,7 +17,14 @@ __all__ = [
 def snape_clean(
         do_ask: bool,
         here: bool
-):
+) -> list[Path]:
+    """
+    Remove unknown files from the global snape directory or delete broken local environments.
+
+    For argument documentation, see ``snape_clean_parser``.
+
+    :return: A list of all removed files.
+    """
     if here:
         log("Collecting unknown files at", Path.cwd())
         local_venv = get_snape_venv_path(None, True)
@@ -28,7 +36,7 @@ def snape_clean(
             if (not do_ask) or ask("Remove broken local environment?", default=True):
                 log("Removing directory", local_venv)
                 shutil.rmtree(local_venv)
-        return
+        return [local_venv]
 
     log("Collecting unknown files at", env_var.SNAPE_ROOT)
     global_venv_files = list(map(lambda env: env_var.SNAPE_ROOT_PATH / env, os.listdir(env_var.SNAPE_ROOT_PATH)))
@@ -45,7 +53,7 @@ def snape_clean(
 
     if len(other_files) == 0:
         info("Nothing to do")
-        return
+        return []
 
     info("Global venvs:")
     for global_venv in global_venvs:
@@ -54,16 +62,22 @@ def snape_clean(
     for other_file in other_files:
         info("   >", other_file.name, "[dir]" if other_file.is_dir() else "[file]")
 
+    removed_files = []
     if (not do_ask) or ask("Do you want to delete all files that are no valid global environments?", default=True):
         for other_file in other_files:
             if other_file.is_file():
                 log("Removing file", other_file)
                 os.remove(other_file)
+                removed_files.append(other_file)
             elif other_file.is_dir():
                 log("Removing directory", other_file)
                 shutil.rmtree(other_file)
+                removed_files.append(other_file)
+    else:
+        raise SnapeCancel()
 
     info("Snape cleanup done")
+    return removed_files
 
 
 snape_clean_parser = subcommands.add_parser(

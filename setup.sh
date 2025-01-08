@@ -37,16 +37,25 @@ then
 	export SNAPE_PYTHON="/usr/bin/python3"
 fi
 
+if [ -f "$(dirname "$SNAPE_PYTHON")/activate" ]
+then
+  cat <<WARN
+Warning: It seems like your python executable is contained within a virtual environment.
+         You should select a different installation to run snape.
+         This can be done by setting the \$SNAPE_PYTHON variable.
+WARN
+fi
+
 if ! "$SNAPE_PYTHON" --version >/dev/null
 then
-	echo "Python not found at $SNAPE_PYTHON" >&2
+	echo "Python not found at $SNAPE_PYTHON (\$SNAPE_PYTHON variable)" >&2
 	exit 2
 fi
 
 if ! "$SNAPE_PYTHON" -c "import venv" >/dev/null
 then
-	echo "python-venv is not installed" >&2
+	echo "python-venv is not installed for $SNAPE_PYTHON" >&2
 	exit 3
 fi
 
-"$SNAPE_PYTHON" snape/run.py $SNAPE_OPT -s "$SNAPE_SHELL" setup init
+"$SNAPE_PYTHON" run.py $SNAPE_OPT -s "$SNAPE_SHELL" setup init
