@@ -19,7 +19,6 @@ def snape_setup() -> None:
     snape_setup_parser.print_help()
 
 
-# The subcommand parser for ``snape setup``.
 snape_setup_parser = subcommands.add_parser(
     "setup",
     description="Manage the snape installation.",
@@ -156,7 +155,6 @@ snape_setup_remove_parser.add_argument(
     help="undo the effects of snape setup init",
     action="append_const", const="init", default=None, dest="argv"
 )
-# Remove all global environments as well
 snape_setup_remove_parser.add_argument(
     "-r", "--root",
     help="remove the $SNAPE_ROOT directory containing all environments",

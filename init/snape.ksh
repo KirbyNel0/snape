@@ -5,7 +5,7 @@ if ! [[ "$(cd -- "$(dirname -- "$0")" && pwd -P)/$(basename -- "$0")" != "$(cd -
 	return 100
 fi
 
-if [ -z "$SNAPE_PYTHON" ]; then
+if test -z "$SNAPE_PYTHON"; then
 	export SNAPE_PYTHON="/usr/bin/python3"
 fi
 
@@ -14,93 +14,88 @@ if ! "$SNAPE_PYTHON" -c "import venv" >/dev/null 2>&1; then
 	return 2
 fi
 
-if [ -z "$SNAPE_ROOT" ]; then
+if test -z "$SNAPE_ROOT"; then
 	export SNAPE_ROOT="$HOME/.snape"
 fi
 
-if [ -z "$SNAPE_VENV" ]; then
-	export SNAPE_VENV="snape"
+if test -z "$SNAPE_VENV"; then
+	export SNAPE_VENV=".venv"
 fi
 
-if [ -z "$SNAPE_LOCAL_VENV" ]; then
-	export SNAPE_LOCAL_VENV=".snape"
-fi
+_SNAPE_SCRIPT=$(realpath "$(dirname "${.sh.file}")/../run.py")
+_SNAPE_SCRIPT_CMD="help --help -h new touch delete rm env setup status possess attach detach clean"
 
-SNAPE_SCRIPT=$(realpath "$(dirname "${.sh.file}")/../run.py")
-SNAPE_SCRIPT_CMD="help --help -h new touch delete rm env setup status possess attach detach clean"
+_find_snape_venv() {
+	RESULT="$(realpath "$(pwd)")"
+	while test "$RESULT" != "/"; do
+		if test -f "$RESULT/$SNAPE_VENV/bin/activate" -a -f "$RESULT/$SNAPE_VENV/bin/python"; then
+			echo "$RESULT"
+			unset RESULT
+			return 0
+		fi
+		RESULT=$(dirname "$RESULT")
+	done
+	unset RESULT
+	return 1
+}
 
 function snape {
 	mkdir -p "$SNAPE_ROOT"
 
 	if ! test -d "$SNAPE_ROOT"; then
 		echo "snape: Unable to create root directory" 1>&2
-		return 3
+		return 1
 	fi
 
 	# No environment given
-	if [[ $# -eq 0 ]]; then
+	if test $# -eq 0; then
 		# venv is active => deactivate
-		if [[ -n "$VIRTUAL_ENV" ]]; then
+		if test -n "$VIRTUAL_ENV"; then
 			deactivate
 			return 0
 		fi
 
-		# Snape is inactive => activate default environment
-		if ! [[ -f "$SNAPE_ROOT/$SNAPE_VENV/bin/activate" && -f "$SNAPE_ROOT/$SNAPE_VENV/bin/python" ]]; then
-			# The default environment does not exist, create it
-			if ! "$SNAPE_PYTHON" "$SNAPE_SCRIPT" new "$SNAPE_VENV"; then
-				return 4
-			fi
+		# Check if valid local environment exists
+		LOCAL_VENV=$(_find_snape_venv)
+		if test "$?" -ne 0; then
+			echo "No snape environment found (nor in any parent directory)" >&2
+			echo "Run snape new to create one" >&2
+			unset LOCAL_VENV
+			return 2
 		fi
 
-		# activate
-		source "$SNAPE_ROOT/$SNAPE_VENV/bin/activate"
+		# Activate local environment
+		source "$LOCAL_VENV/$SNAPE_VENV/bin/activate"
+		unset LOCAL_VENV
 		return 0
 	fi
 
 	# This seems like a python problem
-	if echo "$SNAPE_SCRIPT_CMD" | grep -wq -- "$1"; then
-		"$SNAPE_PYTHON" "$SNAPE_SCRIPT" "$@"
+	if echo "$_SNAPE_SCRIPT_CMD" | grep -wq -- "$1"; then
+		"$SNAPE_PYTHON" "$_SNAPE_SCRIPT" "$@"
 		return $?
 	fi
 
 	# Environment given which should be activated
-	if [[ "$#" == 1 ]]; then
-		# Manage local environment
-		if [[ "$1" == "here" || "$1" == "--here" || "$1" == "--local" ]]; then
-			# Environment is active, deactivate
-			if [[ -n "$VIRTUAL_ENV" ]]; then
-				deactivate
-			fi
-
-			if ! [[ -f "$SNAPE_LOCAL_VENV/bin/activate" && -f "$SNAPE_LOCAL_VENV/bin/python" ]]; then
-				echo "No snape environment found in the current directory" >&2
-				echo "Run snape new --here to create one" >&2
-				return 5
-			fi
-
-			source "$SNAPE_LOCAL_VENV/bin/activate"
-			return 0
-		fi
-
-		if [[ -f "$SNAPE_ROOT/$1/bin/activate" && -f "$SNAPE_ROOT/$1/bin/python" ]]; then
+	if test $# -eq 1; then
+		if test -f "$SNAPE_ROOT/$1/bin/activate" -a -f "$SNAPE_ROOT/$1/bin/python"; then
 			# Deactivate the current environment before activating the new one
-			if [[ -n "$VIRTUAL_ENV" ]]; then
+			if test -n "$VIRTUAL_ENV"; then
 				deactivate
 			fi
 
 			if source "$SNAPE_ROOT/$1/bin/activate"; then
 				return 0
 			else
-				return 6
+				return 3
 			fi
 		else
-			echo "No environment named '$1'"
-			return 7
+			echo "No environment named \"$1\""
+			return 4
 		fi
 	fi
 
 	# This script cannot handle more than one argument,
 	# anything else is passed to the python script
-	"$SNAPE_PYTHON" "$SNAPE_SCRIPT" "$@"
+	"$SNAPE_PYTHON" "$_SNAPE_SCRIPT" "$@"
 }

@@ -14,8 +14,7 @@ __all__ = [
 
 def snape_delete(
         envs: list[str],
-        ignore_not_exists: bool,
-        here: bool,
+        error_not_exists: bool,
         do_ask: bool,
         ignore_active: bool
 ) -> list[Path]:
@@ -26,13 +25,15 @@ def snape_delete(
 
     :return: A list of all deleted environment paths.
     """
-    if len(envs) == 0 and not here:
+    if len(envs) == 0:
         raise ValueError("No snape environments specified")
 
-    old_venv_paths = [*map(lambda x: get_snape_venv_path(x, False), envs)]
-
-    if here:
-        old_venv_paths.append(get_snape_venv_path(name=None, local=True))
+    old_venv_paths = []
+    for env in envs:
+        if env == "--local":
+            old_venv_paths.append(get_snape_venv_path(None, True))
+        else:
+            old_venv_paths.append(get_snape_venv_path(env, False))
 
     deleted_venvs = []
     for old_venv_path in old_venv_paths:
@@ -41,11 +42,11 @@ def snape_delete(
         try:
             old_venv = ensure_venv(old_venv_path)
         except Exception as e:
-            if ignore_not_exists:
+            if error_not_exists:
+                raise e
+            else:
                 info("Virtual environment directory not found:", old_venv_path)
                 continue
-            else:
-                raise e
         try:
             delete_snape_venv(old_venv, do_ask, ignore_active)
         except SnapeCancel:
@@ -55,7 +56,6 @@ def snape_delete(
     return deleted_venvs
 
 
-# The subcommand parser for ``snape delete``.
 snape_delete_parser = subcommands.add_parser(
     "delete", aliases=["rm"],
     description=
@@ -79,13 +79,13 @@ example:
 snape_delete_parser.add_argument(
     "envs", nargs="*",
     help="the names of the environments to delete",
-    action="store", default=[]
+    action="extend"
 )
 # If specified, a local environment will be deleted instead of a global one
 snape_delete_parser.add_argument(
     "-l", "--local", "--here",
     help="remove the snape environment from the current directory",
-    action="store_true", default=False, dest="here"
+    action="append_const", const="--local", dest="envs"
 )
 snape_delete_parser.set_defaults(func=snape_delete)
 
@@ -98,9 +98,9 @@ snape_delete_parser_prompting.add_argument(
 )
 # Whether to ignore non-existing directories
 snape_delete_parser_prompting.add_argument(
-    "-e", "--ignore-not-exists",
-    help="do not throw an error if the environment does not exist",
-    action="store_true", default=False, dest="ignore_not_exists"
+    "-e", "--error-not-exists",
+    help="throw an error if the environment does not exist",
+    action="store_true", default=False, dest="error_not_exists"
 )
 # Continue if environment is currently active
 snape_delete_parser_prompting.add_argument(

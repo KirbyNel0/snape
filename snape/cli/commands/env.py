@@ -69,7 +69,7 @@ def snape_env(
     venv_active = is_active_venv(venv)
     add_info("active", "Active", venv_active)
 
-    if env_var.SNAPE_VENV == venv.name and is_global:
+    if not is_global:
         activate_command = "snape"
     else:
         activate_command = get_snape_venv_name(venv) if is_global else "--here"

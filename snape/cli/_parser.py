@@ -17,30 +17,33 @@ parser = argparse.ArgumentParser(
  It can (de)activate virtual environments for you and manage them.
 
 activate:
-  To activate an environment named "my-venv", call "snape my-venv".
-  If the environment's name is not provided, snape will activate the default environment.
-  If an active snape environment is detected, it will be deactivated before activating the new one.
-  Activation can only be done when snape receives a single command line argument.
+  Call snape without any arguments to activate an environment inside the current
+  working directory or any of its parent directories.
+  To activate a global environment named "my-venv", call "snape my-venv".
+  If an active environment is detected, it will be deactivated before activating the new one.
+  Activation can only be done when snape receives a single or no command line argument.
 
 deactivate:
   To deactivate an active environment, simply run "snape" without any arguments.
 
 global environments:
-  By default, snape environments are accessible for your whole system.
-  Such environments are called global environments.
+  Snape environments which can be activated from anywhere are called global environments.
   The location of those environments can be modified by setting the SNAPE_ROOT shell variable (default: ~/.snape).
-  Snape manages one default global environment whose name can be modified by setting the SNAPE_VENV shell variable (default: snape).
 
 local environments:
-  To work with an environment inside the current working directory, most snape commands offer the "--local" switch.
+  Virtual environments managed by snape not located inside the global environment directory are called local
+  environments and can only be accessed when inside their directory.
+  To work with local environments, most snape subcommands offer the "--local" switch.
   Each directory can only contain a single local environment managed by snape.
-  The name of such environments can be modified by setting the SNAPE_LOCAL_VENV shell variable (default: .snape).
+  The name of such environments can be modified by setting the SNAPE_VENV shell variable (default: .venv).
 
 technical:
-  Snape manages its environments using the python-virtualenv package.
+  Snape manages its environments using the venv package (other names: python3-virtualenv, python3-venv).
   When running the snape command, you will call a shell function which handles (de)activating virtual environments.
   Anything else is managed using a python backend.
-  Due to this behavior, snape is shell-dependent and requires you to install the python-virtualenv package.\
+  Due to this behavior, snape is shell-dependent and requires you to install the venv package.
+  To change what python installation is used to run snape, set the SNAPE_PYTHON shell variable (default: /usr/bin/python3).
+  That installation must have the venv package installed and should not be located inside a virtual environment.\
     """,
     formatter_class=argparse.RawDescriptionHelpFormatter
 )

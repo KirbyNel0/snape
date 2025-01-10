@@ -75,7 +75,6 @@ def snape_attach(
     return snape_venv
 
 
-# The subcommand parser for ``snape attach``.
 snape_attach_parser = subcommands.add_parser(
     "attach", aliases=["possess"],
     description=
@@ -92,7 +91,6 @@ example:
     help="copy any local environment to a snape-managed environment",
     formatter_class=argparse.RawDescriptionHelpFormatter
 )
-# The name of the environment to manage
 snape_attach_parser.add_argument(
     "env",
     help="the name or path to the environment to make available to snape",
@@ -101,19 +99,16 @@ snape_attach_parser.add_argument(
 snape_attach_parser.set_defaults(func=snape_attach)
 
 snape_attach_parser_new_env = snape_attach_parser.add_argument_group("setup new environment")
-# Whether to make the new environment a global one
 snape_attach_parser_new_env.add_argument(
     "-l", "--local", "--here",
     help="make the new environment local, not global",
     action="store_true", default=False, dest="here"
 )
-# A new name for the new global environment
 snape_attach_parser_new_env.add_argument(
     "--as",
     help="give the new environment an other name. without this, it will have the same name as the old environment.",
     action="store", default=None, dest="global_name", metavar="NAME"
 )
-# Whether to prompt the user for existing venv
 snape_attach_parser_new_env.add_argument(
     "-o", "--overwrite",
     help="overwrite existing environments having the same name as the environment's new name",
@@ -126,7 +121,6 @@ snape_attach_parser_packages.add_argument(
     help="hide output from pip when installing packages",
     action="store_true", default=False, dest="requirements_quiet"
 )
-# Whether to update pip (see venv package), this usually takes a while
 snape_attach_parser_packages.add_argument(
     "-n", "--no-update",
     help="do not update pip after initializing the new environment",
@@ -144,7 +138,6 @@ snape_attach_parser_old_env.add_argument(
     help="do not prompt before deleting the old environment (with -d)",
     action="store_false", default=True, dest="do_ask"
 )
-# Continue if environment is currently active
 snape_attach_parser_old_env.add_argument(
     "-i", "--ignore-active",
     help="do not exit if the specified environment is currently active (with -d)",

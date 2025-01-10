@@ -114,7 +114,6 @@ snape_detach_parser_new_env.add_argument(
 )
 
 snape_detach_parser_old_env = snape_detach_parser.add_argument_group("old environment")
-# Continue if environment is currently active
 snape_detach_parser_old_env.add_argument(
     "-d", "--delete-old",
     help="delete the old environment after it has been copied successfully",

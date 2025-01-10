@@ -27,11 +27,8 @@ __VARS__: Final[dict[str, str | None]] = {
     # The directory of all global snape environments.
     "SNAPE_ROOT": os.getenv("SNAPE_ROOT"),
 
-    # The name of the default global snape environment.
-    "SNAPE_VENV": os.getenv("SNAPE_VENV"),
-
     # The name of local snape environments.
-    "SNAPE_LOCAL_VENV": os.getenv("SNAPE_LOCAL_VENV"),
+    "SNAPE_VENV": os.getenv("SNAPE_VENV"),
 }
 
 

@@ -17,7 +17,6 @@ def snape_new(
         do_update: bool,
         requirements: str | None,
         requirements_quiet: bool,
-        here: bool,
         overwrite: bool
 ) -> None:
     """
@@ -25,10 +24,7 @@ def snape_new(
 
     For argument documentation, see ``snape_new_parser``.
     """
-    if here and env is not None:
-        raise ValueError("snape new --here: Cannot provide an environment name")
-
-    new_venv_path = get_snape_venv_path(env, here)
+    new_venv_path = get_snape_venv_path(env, env is None)
 
     log("Directory for new venv:", new_venv_path)
 
@@ -64,15 +60,14 @@ def snape_new(
         install_packages(new_venv, requirements_source, no_output=requirements_quiet)
 
 
-# The subcommand parser for ``snape new``.
 snape_new_parser = subcommands.add_parser(
     "new",
     description=
     """\
   Create new snape-managed environments.
 
-  To create a new global environment, use snape new MY_VENV.
-  To create a new local environment, use snape new --local.
+  To create a new local environment, use snape new.
+  To create a new global environment named MY_VENV, use snape new MY_VENV.
 
   An existing environment can be overwritten with this command.
   This can only be done if it is a valid environment, meaning not a simple directory or file.
@@ -84,20 +79,11 @@ example:
     help="create a new environment",
     formatter_class=argparse.RawDescriptionHelpFormatter
 )
-# The name of the new environment
 snape_new_parser.add_argument(
     "env", nargs="?",
-    help="the name of the new environment",
+    help="the name of the new global environment. if not provided, a local environment is created.",
     action="store", default=None
 )
-# If specified, a local environment will be created instead of a global one
-snape_new_parser.add_argument(
-    "-l", "--local", "--here",
-    help="create a snape environment in the current directory. "
-         "not allowed to provide 'env'.",
-    action="store_true", default=False, dest="here"
-)
-# Whether to prompt the user for existing venv
 snape_new_parser.add_argument(
     "-o", "--overwrite",
     help="overwrite existing environments without prompting first",
@@ -106,19 +92,16 @@ snape_new_parser.add_argument(
 snape_new_parser.set_defaults(func=snape_new)
 
 snape_new_parser_packages = snape_new_parser.add_argument_group("pip and packages")
-# Whether to update pip (see venv package), this usually takes a while
 snape_new_parser_packages.add_argument(
     "-n", "--no-update",
     help="do not update pip after initializing the environment",
     action="store_false", default=True, dest="do_update"
 )
-# Can be given to specify a requirements.txt file into the new environment
 snape_new_parser_packages.add_argument(
     "-r", "--requirements",
     help="can be used to specify a file or venv to read packages from which should be installed into the new venv",
     action="store", default=None, metavar="SOURCE", dest="requirements"
 )
-# If specified with -r, the output of 'pip install -r' will not be printed
 snape_new_parser_packages.add_argument(
     "-q", "--quiet",
     help="hide output from pip when installing packages",

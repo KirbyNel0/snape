@@ -63,7 +63,7 @@ def get_snape_venv_path(name: str | None, local: bool, warn_argument_conflicts: 
             raise RuntimeError("No environment name provided for global snape environment")
 
     if local:
-        return absolute_path(Path.cwd() / env_var.SNAPE_LOCAL_VENV)
+        return absolute_path(Path.cwd() / env_var.SNAPE_VENV)
 
     if not name:
         raise ValueError("No name provided for global snape environment")
@@ -99,7 +99,7 @@ def get_snape_venv_name(env: str | Path | VirtualEnv) -> str | None:
         result.append(venv.name)
         return "/".join(reversed(result))
     
-    return env.name if env.name == env_var.SNAPE_LOCAL_VENV else None
+    return env.name if env.name == env_var.SNAPE_VENV else None
 
 
 def create_new_snape_venv(env: Path, overwrite: bool | None, autoupdate: bool) -> VirtualEnv | None:
