@@ -39,7 +39,7 @@ def snape_setup_init() -> None:
     snape_shell_script: Path = env_var.SNAPE_REPO_PATH / "init" / f"snape.{env_var.SHELL}"
     init_file: Path = absolute_path(shell["init_file"])
     source_line: str = f"source '{snape_shell_script}'"
-    # Only used by is_venv function: activate_file = shell["activate_file"]
+    # Only used by is_virtual_env function: activate_file = shell["activate_file"]
 
     log("Shell:          ", env_var.SHELL)
     log("Shell init file:", init_file)
@@ -93,7 +93,7 @@ def snape_setup_remove(
     snape_shell_script: Path = env_var.SNAPE_REPO_PATH / "init" / f"snape.{env_var.SHELL}"
     init_file: Path = absolute_path(shell["init_file"])
     source_line: str = f"source '{snape_shell_script}'"
-    # Only used by is_venv function: activate_file = shell["activate_file"]
+    # Only used by is_virtual_env function: activate_file = shell["activate_file"]
 
     log("Shell:          ", env_var.SHELL)
     log("Shell init file:", init_file)

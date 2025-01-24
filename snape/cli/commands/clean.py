@@ -7,7 +7,7 @@ from snape.annotations import SnapeCancel
 from snape import env_var
 from snape.cli._parser import subcommands
 from snape.util import ask, log, info
-from snape.virtualenv import get_global_snape_venvs, get_snape_venv_path, is_venv
+from snape.virtualenv import get_global_snape_envs, get_snape_env_path, is_virtual_env
 
 __all__ = [
     "snape_clean"
@@ -28,20 +28,20 @@ def snape_clean(
     # Local files
     unknown_local_files = []
     log("Collecting unknown files at", Path.cwd())
-    broken_local_venv = get_snape_venv_path(None, True)
-    if broken_local_venv.exists() and not is_venv(broken_local_venv):
-        unknown_local_files.append(broken_local_venv)
+    broken_local_env = get_snape_env_path(None, True)
+    if broken_local_env.exists() and not is_virtual_env(broken_local_env):
+        unknown_local_files.append(broken_local_env)
     log("Unknown local files:", [*map(str, unknown_local_files)])
 
     # Global files
     unknown_global_files = []
     log("Collecting unknown files at", env_var.SNAPE_ROOT)
-    global_venv_files = list(map(lambda env: env_var.SNAPE_ROOT_PATH / env, os.listdir(env_var.SNAPE_ROOT_PATH)))
-    global_venvs = get_global_snape_venvs()
-    no_venvs = list(set(global_venv_files) - set(global_venvs))
-    log("No venvs:", [*map(str, no_venvs)])
-    for other_file in no_venvs:
-        if any(other_file in global_venv.parents for global_venv in global_venvs):
+    global_env_files = list(map(lambda env: env_var.SNAPE_ROOT_PATH / env, os.listdir(env_var.SNAPE_ROOT_PATH)))
+    global_envs = get_global_snape_envs()
+    no_envs = list(set(global_env_files) - set(global_envs))
+    log("No venvs:", [*map(str, no_envs)])
+    for other_file in no_envs:
+        if any(other_file in global_env.parents for global_env in global_envs):
             log("Directory contains nested venvs:", other_file)
             continue
         unknown_global_files.append(other_file)

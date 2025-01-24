@@ -4,8 +4,8 @@ from pathlib import Path
 from snape.annotations import SnapeCancel
 from snape.cli._parser import subcommands
 from snape.util import log, info
-from snape.virtualenv import ensure_venv, delete_snape_venv
-from snape.virtualenv.internal import get_snape_venv_path
+from snape.virtualenv import ensure_virtual_env, delete_snape_env
+from snape.virtualenv.internal import get_snape_env_path
 
 __all__ = [
     "snape_delete"
@@ -26,34 +26,34 @@ def snape_delete(
     :return: A list of all deleted environment paths.
     """
     if len(envs) == 0:
-        raise ValueError("No snape environments specified")
+        envs = ["--local"]
 
-    old_venv_paths = []
+    old_env_paths = []
     for env in envs:
         if env == "--local":
-            old_venv_paths.append(get_snape_venv_path(None, True))
+            old_env_paths.append(get_snape_env_path(None, True))
         else:
-            old_venv_paths.append(get_snape_venv_path(env, False))
+            old_env_paths.append(get_snape_env_path(env, False))
 
-    deleted_venvs = []
-    for old_venv_path in old_venv_paths:
-        log("Directory of old venv:", old_venv_path)
+    deleted_envs = []
+    for old_env_path in old_env_paths:
+        log("Directory of old venv:", old_env_path)
 
         try:
-            old_venv = ensure_venv(old_venv_path)
+            old_env = ensure_virtual_env(old_env_path)
         except Exception as e:
             if error_not_exists:
                 raise e
             else:
-                info("Virtual environment directory not found:", old_venv_path)
+                info("Virtual environment directory not found:", old_env_path)
                 continue
         try:
-            delete_snape_venv(old_venv, do_ask, ignore_active)
+            delete_snape_env(old_env, do_ask, ignore_active)
         except SnapeCancel:
             continue
-        deleted_venvs.append(old_venv)
+        deleted_envs.append(old_env)
 
-    return deleted_venvs
+    return deleted_envs
 
 
 snape_delete_parser = subcommands.add_parser(
@@ -64,13 +64,14 @@ snape_delete_parser = subcommands.add_parser(
 
   To delete a global environment, its name must be provided.
   To delete a local environment, specify --local as name.
+  If no name got specified, --local will be assumed.
 
   To list all existing environments, use snape status.
   To delete invalid environments, use snape clean.
 
 example:
-  To delete a global environment named MY_VENV, call
-    snape delete MY_VENV\
+  To delete a global environment named ENV, call
+    snape delete ENV\
     """,
     help="delete an existing environment",
     formatter_class=argparse.RawDescriptionHelpFormatter

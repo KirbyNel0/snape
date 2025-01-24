@@ -4,7 +4,7 @@ from pathlib import Path
 import snape
 
 
-def create_dummy_venv(__path: os.PathLike[str]):
+def create_dummy_virtual_env(__path: os.PathLike[str]):
     path = Path(__path)
 
     if not path.is_dir():
@@ -20,7 +20,7 @@ def create_dummy_venv(__path: os.PathLike[str]):
         (path / snape.config.SHELLS[snape.env_var.SHELL]["activate_file"]).touch()
 
 
-def create_dummy_broken_venv(__path: os.PathLike[str]):
+def create_dummy_broken_virtual_env(__path: os.PathLike[str]):
     path = Path(__path)
 
     if not path.is_dir():

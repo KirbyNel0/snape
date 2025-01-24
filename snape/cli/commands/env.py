@@ -6,8 +6,8 @@ from snape import env_var
 from snape.cli._parser import subcommands
 from snape.util import log, absolute_path
 from snape.util.path import get_dir_size
-from snape.virtualenv import get_snape_venv_path, get_venv_packages, ensure_venv, is_active_venv, is_venv
-from snape.virtualenv.internal import is_global_snape_venv_path, get_snape_venv_name
+from snape.virtualenv import get_snape_env_path, get_env_packages, ensure_virtual_env, is_active_virtual_env, is_virtual_env
+from snape.virtualenv.internal import is_global_snape_env_path, get_snape_env_name
 
 __all__ = [
     "snape_env"
@@ -21,7 +21,7 @@ def snape_env(
         information: list[str],
 ):
     """
-    Get information on the current venv or any snape environment.
+    Get information on the current virtual env or any snape environment.
 
     For argument documentation, see ``snape_env_parser``.
     """
@@ -44,45 +44,45 @@ def snape_env(
     # Path information
     if env is None and not here:
         if env_var.VIRTUAL_ENV is not None:
-            venv_path = absolute_path(env_var.VIRTUAL_ENV)
+            env_path = absolute_path(env_var.VIRTUAL_ENV)
         else:
-            venv_path = None
-        if venv_path is None or not is_venv(venv_path):
+            env_path = None
+        if env_path is None or not is_virtual_env(env_path):
             raise ValueError("No environment specified and no active environment found")
     else:
-        venv_path = get_snape_venv_path(env, here)
+        env_path = get_snape_env_path(env, here)
 
-    venv = ensure_venv(venv_path)
-    add_info("name", "Name", get_snape_venv_name(venv))
+    virtual_env = ensure_virtual_env(env_path)
+    add_info("name", "Name", get_snape_env_name(virtual_env))
 
     # Global information
-    is_global = is_global_snape_venv_path(venv)
+    is_global = is_global_snape_env_path(virtual_env)
     if raw:
         add_info("global", None, is_global)
     else:
         add_info(None, "Placement", "global" if is_global else "local")
 
     # Path
-    add_info("path", "Path", venv)
+    add_info("path", "Path", virtual_env)
 
     # Active information
-    venv_active = is_active_venv(venv)
-    add_info("active", "Active", venv_active)
+    env_active = is_active_virtual_env(virtual_env)
+    add_info("active", "Active", env_active)
 
     if not is_global:
         activate_command = "snape"
     else:
-        activate_command = get_snape_venv_name(venv) if is_global else "--here"
+        activate_command = get_snape_env_name(virtual_env) if is_global else "--here"
         activate_command = f"snape {activate_command}"
     add_info("activate_command", "Command", activate_command)
 
     if "size" in information:  # Information
         log("Collecting size")
-        size = get_dir_size(venv) >> 10  # Bytes returned, kilobytes calculated
+        size = get_dir_size(virtual_env) >> 10  # Bytes returned, kilobytes calculated
         add_info("size", "Size (MB)", round(size / 1024, 3))
 
     if "packages" in information:  # Packages
-        packages = get_venv_packages(venv)
+        packages = get_env_packages(virtual_env)
         add_info("packages", "Installed packages", packages)
 
     if raw:  # Output raw

@@ -5,8 +5,8 @@ from snape import env_var
 from snape.annotations import SnapeCancel
 from snape.cli._parser import subcommands
 from snape.util import log, info, ask
-from snape.virtualenv import ensure_venv, get_snape_venv_path, get_venv_packages, create_new_snape_venv, \
-    install_packages, delete_snape_venv, get_snape_venv_name
+from snape.virtualenv import ensure_virtual_env, get_snape_env_path, get_env_packages, create_new_snape_env, \
+    install_packages, delete_snape_env, get_snape_env_name
 
 __all__ = [
     "snape_attach"
@@ -33,46 +33,46 @@ def snape_attach(
 
     :return: The path of the new environment.
     """
-    user_venv = ensure_venv(Path(env))
-    log("Old environment path:", user_venv)
+    user_env = ensure_virtual_env(Path(env))
+    log("Old environment path:", user_env)
 
     # Check whether the environment is located at snape root (is global environment)
-    if user_venv.parent == env_var.SNAPE_ROOT_PATH:
+    if user_env.parent == env_var.SNAPE_ROOT_PATH:
         log("Old environment is already known to snape")
         info("Nothing to do")
         return None
 
-    snape_venv_path = get_snape_venv_path(global_name, here)
-    log("New environment path:", snape_venv_path)
+    snape_env_path = get_snape_env_path(global_name, here)
+    log("New environment path:", snape_env_path)
 
     # Check whether the new environment is the same as the old one
     # This can happen for local environments already having the correct name
-    if snape_venv_path == Path(user_venv):
+    if snape_env_path == Path(user_env):
         log("New environment points to old name")
         info("Nothing to do")
         return None
 
-    packages = get_venv_packages(user_venv)
+    packages = get_env_packages(user_env)
     if len(packages) == 0:
         info(f"Note: No additional packages were installed in '{env}'")
 
     # Create output and prompt
     locality = "local" if here else "global"
-    question = f"Do you want to create a new {locality} environment named '{get_snape_venv_name(snape_venv_path)}' with the requirements of '{env}'?"
+    question = f"Do you want to create a new {locality} environment named '{get_snape_env_name(snape_env_path)}' with the requirements of '{user_env.name}'?"
     if do_ask and not ask(question, default=True):
         raise SnapeCancel()
 
     if not overwrite:
         overwrite = None
-    snape_venv = create_new_snape_venv(snape_venv_path, overwrite, do_update)
+    snape_env = create_new_snape_env(snape_env_path, overwrite, do_update)
 
-    if not install_packages(snape_venv, packages, requirements_quiet):
+    if not install_packages(snape_env, packages, requirements_quiet):
         raise RuntimeError("Could not install all packages")
 
     if delete_old:
-        delete_snape_venv(user_venv, do_ask, ignore_active)
+        delete_snape_env(user_env, do_ask, ignore_active)
 
-    return snape_venv
+    return snape_env
 
 
 snape_attach_parser = subcommands.add_parser(

@@ -8,16 +8,16 @@ from snape.config import SHELLS
 from snape.util import absolute_path, log, info
 
 __all__ = [
-    "is_venv",
-    "is_active_venv",
-    "ensure_venv",
-    "get_venv_packages",
+    "is_virtual_env",
+    "is_active_virtual_env",
+    "ensure_virtual_env",
+    "get_env_packages",
     "install_packages",
     "install_requirements"
 ]
 
 
-def is_venv(env: Path) -> bool:
+def is_virtual_env(env: Path) -> bool:
     """
     Checks whether the given path points to a python virtual environment.
     This function is shell dependant and performs its checks depending on the global ``SHELL`` variable.
@@ -28,7 +28,7 @@ def is_venv(env: Path) -> bool:
     return env.is_dir() and (env / SHELLS[env_var.SHELL]["activate_file"]).is_file() and (env / "bin/python").is_file()
 
 
-def is_active_venv(env: VirtualEnv) -> bool:
+def is_active_virtual_env(env: VirtualEnv) -> bool:
     """
     Checks whether the specified environment is the currently active python environment.
 
@@ -38,7 +38,7 @@ def is_active_venv(env: VirtualEnv) -> bool:
     return env_var.VIRTUAL_ENV is not None and absolute_path(env_var.VIRTUAL_ENV) == absolute_path(env)
 
 
-def ensure_venv(env: Path) -> VirtualEnv:
+def ensure_virtual_env(env: Path) -> VirtualEnv:
     """
     Ensures the specified path is a virtual environment and returns it as an absolute path.
 
@@ -49,14 +49,14 @@ def ensure_venv(env: Path) -> VirtualEnv:
     """
     if not env.is_dir():
         raise NotADirectoryError(f"Virtual environment directory not found: {env}")
-    if not is_venv(env):
+    if not is_virtual_env(env):
         raise SystemError(f"Not a virtual environment: {env}")
     return cast(VirtualEnv, absolute_path(env))
 
 
 # Could be used: pip --require-virtualenv [commands...]
 
-def get_venv_packages(env: VirtualEnv) -> list[str]:
+def get_env_packages(env: VirtualEnv) -> list[str]:
     """
     Uses the ``pip`` command to list all installed packages of a virtual environment and converts it to a python list.
 
