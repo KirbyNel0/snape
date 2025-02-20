@@ -17,7 +17,7 @@ def snape_new(
         do_update: bool,
         requirements: str | None,
         requirements_quiet: bool,
-        overwrite: bool,
+        overwrite: bool | None,
         prompt: str | None
 ) -> None:
     """
@@ -29,36 +29,35 @@ def snape_new(
 
     log("Directory for new venv:", new_env_path)
 
-    # Check whether requirements must be installed into the new environment
-    requirements_source: Path | list[str] | None
-    if requirements is not None:
-        requirements_path = Path(requirements)
-        
-        if requirements_path.is_file():
-            requirements_source: Path = requirements_path
-            log("Requirements file:", requirements_source)
-        elif is_virtual_env(requirements_path):
-            # Must be a venv from here on
-            requirements_env = typing.cast(VirtualEnv, requirements_path)
-            requirements_source: list[str] = get_env_packages(requirements_env)
+    requirements_path = Path(requirements)
 
-            if len(requirements_source) == 0:
-                info(f"Note: No additional packages were installed in {requirements_path}")
-        else:
-            raise FileNotFoundError(f"Requirements file/venv not found: {requirements_path}")
-    else:
-        requirements_source = None
+    is_requirements_file = requirements is not None and requirements_path.is_file()
+    is_requirements_env = requirements is not None and is_virtual_env(requirements_path)
+
+    if not is_requirements_env and not is_requirements_file:
+        raise FileNotFoundError(f"Requirements file/venv not found: {requirements_path}")
 
     if not overwrite:
         overwrite = None
     # Create environment
     new_env = create_new_snape_env(new_env_path, overwrite, do_update, prompt)
 
-    # Install requirements
-    if isinstance(requirements_source, Path):
-        install_requirements(new_env, requirements_source, no_output=requirements_quiet)
-    elif isinstance(requirements_source, list):
-        install_packages(new_env, requirements_source, no_output=requirements_quiet)
+    if new_env is None:
+        return
+
+    # Check whether requirements must be installed into the new environment
+    if requirements is not None:
+        if is_requirements_file:
+            log("Requirements file:", requirements_path)
+            install_requirements(new_env, requirements_path, no_output=requirements_quiet)
+        elif is_requirements_env:
+            # Must be a venv from here on
+            requirements_env = typing.cast(VirtualEnv, requirements_path)
+            packages = get_env_packages(requirements_env)
+            if len(packages) == 0:
+                info(f"Note: No additional packages were installed in {requirements_path}")
+
+            install_packages(new_env, packages, no_output=requirements_quiet)
 
 
 snape_new_parser = subcommands.add_parser(

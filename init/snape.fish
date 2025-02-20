@@ -23,7 +23,7 @@ if test -z "$SNAPE_VENV"
 end
 
 set _SNAPE_SCRIPT (realpath (dirname (status current-filename))/../run.py)
-set _SNAPE_SCRIPT_CMD "help --help -h new touch delete rm env setup status possess attach detach clean"
+set _SNAPE_SCRIPT_CMD "help --help -h new touch delete rm env setup status possess attach detach clean exec"
 
 function _find_snape_venv
     set -l RESULT (realpath (pwd))

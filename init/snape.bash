@@ -23,7 +23,7 @@ if test -z "$SNAPE_VENV"; then
 fi
 
 _SNAPE_SCRIPT=$(realpath "$(dirname "${BASH_SOURCE[0]}")/../run.py")
-_SNAPE_SCRIPT_CMD="help --help -h new touch delete rm env setup status possess attach detach clean"
+_SNAPE_SCRIPT_CMD="help --help -h new touch delete rm env setup status possess attach detach clean exec"
 
 _find_snape_venv() {
 	RESULT="$(realpath "$(pwd)")"

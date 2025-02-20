@@ -83,12 +83,12 @@ snape_clean_parser = subcommands.add_parser(
     description=
     """\
   Delete files in the snape root directory which are no valid snape environments.
-  Using the --local flag, a local environment can be checked for its validity.
+  Will also check whether the current directory contains broken environments.
 
   An environment is considered valid if it contains a python executable and an activation script.
   An environment is also invalid if it points to a single file instead of a directory.\
     """,
-    help="delete unclassified global environments",
+    help="delete broken environments",
     formatter_class=argparse.RawDescriptionHelpFormatter
 )
 snape_clean_parser.add_argument(
