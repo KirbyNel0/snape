@@ -29,12 +29,12 @@ def snape_new(
 
     log("Directory for new venv:", new_env_path)
 
-    requirements_path = Path(requirements)
+    requirements_path = None if requirements is None else Path(requirements)
 
     is_requirements_file = requirements is not None and requirements_path.is_file()
     is_requirements_env = requirements is not None and is_virtual_env(requirements_path)
 
-    if not is_requirements_env and not is_requirements_file:
+    if requirements and not is_requirements_env and not is_requirements_file:
         raise FileNotFoundError(f"Requirements file/venv not found: {requirements_path}")
 
     if not overwrite:

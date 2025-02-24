@@ -48,13 +48,17 @@ def snape_status(
 
     snape_global_envs_str = []
     for env in snape_global_envs:
-        env_prefix = "\033[32m*\033[0m" if str(env) == python_venv else "*"
-        snape_global_envs_str.append(f"    {env_prefix} {get_snape_env_name(env)}")
+        if str(env) == python_venv:
+            snape_global_envs_str.append(f"    * \033[32m{get_snape_env_name(env)}\033[0m")
+        else:
+            snape_global_envs_str.append(f"    * {get_snape_env_name(env)}")
 
     snape_local_envs_str = []
     for env in snape_local_envs:
-        env_prefix = "\033[32m*\033[0m" if str(env) == python_venv else "*"
-        snape_local_envs_str.append(f"    {env_prefix} {env.parent}")
+        if str(env) == python_venv:
+            snape_local_envs_str.append(f"    * \033[32m{env.parent}\033[0m")
+        else:
+            snape_local_envs_str.append(f"    * {env.parent}")
 
     print("Python venv:")
     print("  Current:       ", python_venv)
