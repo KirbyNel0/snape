@@ -8,11 +8,25 @@ __all__ = [
     "subcommands"
 ]
 
-# The parser of the application.
-# For more information, see the ``subcommands`` object.
-parser = argparse.ArgumentParser(
-    prog="snape",
-    description="""
+if "site-packages" in __file__:
+    # Provide no information about (de-)activation when running from an installed package
+    _DESCRIPTION = """\
+ Snape is a wrapper tool around the "venv" python package.
+ It allows you to manage virtual environments more easily.
+
+global environments:
+  Snape manages some environments globally for your system. They are located inside the directory described by the
+  SNAPE_ROOT shell variable (default: ~/.snape).
+
+local environments:
+  Virtual environments managed by snape not located inside the global environment directory are called local
+  environments and can only be accessed when inside their directory.
+  To work with local environments, most snape subcommands offer the "--local" switch.
+  Each directory can only contain a single local environment managed by snape.
+  The name of such environments can be modified by setting the SNAPE_VENV shell variable (default: .venv).\
+    """
+else:
+    _DESCRIPTION = """\
  Snape is a wrapper tool around the "venv" python package.
  It can (de)activate virtual environments for you and manage them.
 
@@ -44,7 +58,13 @@ technical:
   Due to this behavior, snape is shell-dependent and requires you to install the venv package.
   To change what python installation is used to run snape, set the SNAPE_PYTHON shell variable (default: /usr/bin/python3).
   That installation must have the venv package installed and should not be located inside a virtual environment.\
-    """,
+    """
+
+# The parser of the application.
+# For more information, see the ``subcommands`` object.
+parser = argparse.ArgumentParser(
+    prog="snape",
+    description=_DESCRIPTION,
     formatter_class=argparse.RawDescriptionHelpFormatter
 )
 

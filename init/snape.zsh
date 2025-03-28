@@ -22,7 +22,7 @@ if test -z "$SNAPE_VENV"; then
 	export SNAPE_VENV=".venv"
 fi
 # Only without compatibility mode!
-_SNAPE_SCRIPT=$(realpath "$(dirname "$0")/../run.py")
+_SNAPE_SCRIPT=$(realpath "$(dirname "$0")/../src/snape/__main__.py")
 _SNAPE_SCRIPT_CMD="help --help -h new touch delete rm env setup status possess attach detach clean exec"
 
 _find_snape_venv() {

@@ -50,6 +50,9 @@ def get_snape_env_path(name: str | None, local: bool, warn_argument_conflicts: b
     """
     Creates an absolute path pointing to a local or global snape environment with the specified name.
 
+    Other than ``get_local_snape_env``, this will select an environment inside the current directory only whereas
+    the other function checks for an existing local environment.
+
     :param name: The name of the new environment. This will be ignored for local environments and may not be ``None``
         for global environments. It may not be an illegal environment name.
     :param local: Whether the environment should be available globally or locally.

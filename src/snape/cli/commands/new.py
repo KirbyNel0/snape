@@ -1,6 +1,7 @@
 import argparse
 import typing
 from pathlib import Path
+import snape.env_var
 from snape.annotations import VirtualEnv
 from snape.cli._parser import subcommands
 from snape.util import log, info
@@ -18,7 +19,9 @@ def snape_new(
         requirements: str | None,
         requirements_quiet: bool,
         overwrite: bool | None,
-        prompt: str | None
+        prompt: str | None,
+        packages: list[str] | None,
+        install_snape: bool
 ) -> None:
     """
     Create new global or local virtual environments.
@@ -58,6 +61,14 @@ def snape_new(
                 info(f"Note: No additional packages were installed in {requirements_path}")
 
             install_packages(new_env, packages, no_output=requirements_quiet)
+
+    if packages:
+        log("Installing additional packages:", ", ".join(packages))
+        install_packages(new_env, packages, no_output=requirements_quiet)
+
+    if install_snape:
+        log(f"Installing the snape package from {snape.env_var.SNAPE_REPO_PATH}")
+        install_packages(new_env, [str(snape.env_var.SNAPE_REPO_PATH)], no_output=requirements_quiet)
 
 
 snape_new_parser = subcommands.add_parser(
@@ -107,4 +118,14 @@ snape_new_parser_packages.add_argument(
     "-q", "--quiet",
     help="hide output from pip when installing packages",
     action="store_true", default=False, dest="requirements_quiet"
+)
+snape_new_parser_packages.add_argument(
+    "-i", "--install",
+    help="install the specified package into the new environment. may be provided multiple times.",
+    action="append", default=None, dest="packages"
+)
+snape_new_parser_packages.add_argument(
+    "-I", "--install-snape",
+    help="install snape as a python package into the new environment",
+    action="store_true", default=False, dest="install_snape"
 )

@@ -1,0 +1,19 @@
+{
+    "bash": {
+        "init_file": "~/.bashrc",
+        "activate_file": "bin/activate"
+    },
+    "zsh": {
+        "init_file": "~/.zshrc",
+        "activate_file": "bin/activate"
+    },
+    "ksh": {
+        "init_file": "~/.kshrc",
+        "activate_file": "bin/activate"
+    },
+    "fish": {
+        "init_file": "~/.config/fish/config.fish",
+        "activate_file": "bin/activate.fish"
+    }
+}
+

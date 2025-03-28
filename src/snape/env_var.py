@@ -14,7 +14,7 @@ from typing import Final
 
 from snape.util import absolute_path
 
-__all__ = []
+# __all__ not listed to not conflict with the __getattr__
 
 __VARS__: Final[dict[str, str | None]] = {
     # Select the current shell as default.
@@ -50,5 +50,5 @@ SNAPE_ROOT_PATH: Final[Path | None] = absolute_path(__VARS__["SNAPE_ROOT"]) \
     if __VARS__["SNAPE_ROOT"] is not None else None
 "The directory of all global snape environments. If this is not a directory, the script will throw an error."
 
-SNAPE_REPO_PATH: Final[Path] = absolute_path(__file__).parent.parent
-"The directory of the snape repository"
+SNAPE_REPO_PATH: Final[Path] = absolute_path(__file__).parent.parent.parent
+"The snape repository root path"

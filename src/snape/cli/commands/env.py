@@ -6,7 +6,8 @@ from snape import env_var
 from snape.cli._parser import subcommands
 from snape.util import log, absolute_path
 from snape.util.path import get_dir_size
-from snape.virtualenv import get_snape_env_path, get_env_packages, ensure_virtual_env, is_active_virtual_env, is_virtual_env
+from snape.virtualenv import get_snape_env_path, get_env_packages, ensure_virtual_env, is_active_virtual_env, \
+    is_virtual_env, get_local_snape_env
 from snape.virtualenv.internal import is_global_snape_env_path, get_snape_env_name
 
 __all__ = [
@@ -49,8 +50,10 @@ def snape_env(
             env_path = None
         if env_path is None or not is_virtual_env(env_path):
             raise ValueError("No environment specified and no active environment found")
+    elif here:
+        env_path = get_local_snape_env()
     else:
-        env_path = get_snape_env_path(env, here)
+        env_path = get_snape_env_path(env, False)
 
     virtual_env = ensure_virtual_env(env_path)
     add_info("name", "Name", get_snape_env_name(virtual_env))

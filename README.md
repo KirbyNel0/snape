@@ -67,3 +67,28 @@ rm -r ~/.local/snape
 If you installed snape for multiple shells, be sure to remove snape for all those shells using `snape -s`.
 
 If you installed snape manually, remove the line from your initialization file and remove snape's global venv directory and the repository.
+
+## Installing as python package
+
+Snape works without actually installing it as a python package.
+It simulates to be installed each time it is called.
+To install snape as a python package, enter the snape repository and run
+
+```shell
+pip install .
+```
+
+After installation, snape can be imported via the `import` statement into a python script.
+It can also be used as a command line tool, just as the normal snape function:
+
+```shell
+python -m snape
+```
+
+This way, snape cannot activate or deactivate your virtual environments but can only manage them.
+
+**Note:** When creating a new virtual environment using `snape new`, the `--install-snape` option can be used to install snape into the new environment:
+
+```shell
+snape new --install-snape
+```
