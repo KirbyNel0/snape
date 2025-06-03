@@ -58,4 +58,4 @@ then
 	exit 3
 fi
 
-"$SNAPE_PYTHON" run.py $SNAPE_OPT -s "$SNAPE_SHELL" setup init
+"$SNAPE_PYTHON" "./src/snape/__main__.py" $SNAPE_OPT -s "$SNAPE_SHELL" setup init
