@@ -3,6 +3,7 @@ import os
 import subprocess
 import argparse
 from pathlib import Path
+from typing import Union, Optional, List
 
 from snape import env_var
 from snape.config import SHELLS
@@ -12,14 +13,14 @@ from snape.virtualenv import get_snape_env_path, ensure_virtual_env
 
 def snape_exec(
         *,
-        cmd: list[str],
-        env: str | None,
+        cmd: List[str],
+        env: Optional[str],
         local: bool,
-        working_dir: str | None,
+        working_dir: Optional[str],
         quote: str,
         py_script: bool,
         as_python: bool
-) -> int | None:
+) -> Optional[int]:
     """
     Execute some command using a specific snape environment.
 
@@ -41,7 +42,7 @@ def snape_exec(
         log("Entering", working_dir)
         os.chdir(working_dir)
     
-    process: subprocess.Popen | subprocess.CompletedProcess
+    process: Union[subprocess.Popen, subprocess.CompletedProcess]
     try:
         if as_python:
             # specify all arguments for python

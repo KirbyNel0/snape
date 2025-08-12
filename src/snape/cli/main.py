@@ -1,4 +1,4 @@
-from typing import Callable, Any
+from typing import Callable, Any, Optional, List
 
 from snape import env_var
 from snape.cli._parser import parser
@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 
-def main(args: list[str] | None = None) -> None:
+def main(args: Optional[List[str]] = None) -> None:
     """
     Runs snape's command line interface (cli).
 

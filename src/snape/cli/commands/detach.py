@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path
+from typing import Optional
 
 from snape.annotations import SnapeCancel
 from snape.cli._parser import subcommands
@@ -16,14 +17,14 @@ __all__ = [
 def snape_detach(
         path: str,
         here: bool,
-        global_name: str | None,
+        global_name: Optional[str],
         overwrite: bool,
         do_update: bool,
         delete_old: bool,
         requirements_quiet: bool,
         do_ask: bool,
         ignore_active: bool
-) -> Path | None:
+) -> Optional[Path]:
     """
     Create a virtual environment with the same packages as a selected snape environment.
 

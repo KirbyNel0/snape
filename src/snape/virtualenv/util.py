@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-from typing import cast
+from typing import cast, List
 
 from snape import env_var
 from snape.annotations import VirtualEnv
@@ -56,7 +56,7 @@ def ensure_virtual_env(env: Path) -> VirtualEnv:
 
 # Could be used: pip --require-virtualenv [commands...]
 
-def get_env_packages(env: VirtualEnv) -> list[str]:
+def get_env_packages(env: VirtualEnv) -> List[str]:
     """
     Uses the ``pip`` command to list all installed packages of a virtual environment and converts it to a python list.
 
@@ -81,13 +81,13 @@ def get_env_packages(env: VirtualEnv) -> list[str]:
         )
 
     # Create package list
-    packages: list[str] = list(filter(lambda x: x, process.stdout.decode().split("\n")))
+    packages: List[str] = list(filter(lambda x: x, process.stdout.decode().split("\n")))
     log("Packages:", ", ".join(packages))
 
     return packages
 
 
-def install_packages(env: VirtualEnv, packages: list[str], no_output: bool) -> bool:
+def install_packages(env: VirtualEnv, packages: List[str], no_output: bool) -> bool:
     """
     Installs all mentioned packages (with given versions) into the specified virtual environment.
 

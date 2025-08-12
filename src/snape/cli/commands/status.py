@@ -1,7 +1,7 @@
 import argparse
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 from snape import env_var
 from snape.cli._parser import subcommands
@@ -15,7 +15,7 @@ __all__ = [
 
 def snape_status(
         raw: bool
-) -> dict[str, Any]:
+) -> Dict[str, Any]:
     """
     Outputs information on the current venv and snape status.
 

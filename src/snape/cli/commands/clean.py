@@ -2,6 +2,7 @@ import argparse
 import os
 import shutil
 from pathlib import Path
+from typing import List
 
 from snape.annotations import SnapeCancel
 from snape import env_var
@@ -16,7 +17,7 @@ __all__ = [
 
 def snape_clean(
         do_ask: bool
-) -> list[Path]:
+) -> List[Path]:
     """
     Remove unknown files from the global snape directory or delete broken local environments.
 

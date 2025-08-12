@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Union
 
 __all__ = [
     "absolute_path",
@@ -7,9 +8,9 @@ __all__ = [
 ]
 
 
-def absolute_path(path: str | os.PathLike[str]) -> Path:
+def absolute_path(path: Union[str, os.PathLike[str]]) -> Path:
     return Path(path).expanduser().resolve().absolute()
 
 
-def get_dir_size(path: str | os.PathLike[str]) -> int:
+def get_dir_size(path: Union[str, os.PathLike[str]]) -> int:
     return sum(os.path.getsize(f) for f in Path(path).glob('**/*') if f.is_file())

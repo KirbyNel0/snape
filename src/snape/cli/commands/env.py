@@ -1,6 +1,6 @@
 import argparse
 import json
-from typing import Any
+from typing import Any, Optional, List
 
 from snape import env_var
 from snape.cli._parser import subcommands
@@ -16,10 +16,10 @@ __all__ = [
 
 
 def snape_env(
-        env: str | None,
+        env: Optional[str],
         here: bool,
         raw: bool,
-        information: list[str],
+        information: List[str],
 ):
     """
     Get information on the current virtual env or any snape environment.
@@ -29,10 +29,10 @@ def snape_env(
     if raw:  # Assemble all information in an object
         raw_info = {}
 
-        def add_info(key: str | None, _: str | None, value: Any):
+        def add_info(key: Optional[str], _: Optional[str], value: Any):
             raw_info[key] = value
     else:
-        def add_info(_: str | None, name: str | None, value: Any):
+        def add_info(_: Optional[str], name: Optional[str], value: Any):
             if isinstance(value, list):
                 print(f"{name}:")
                 for val in value:

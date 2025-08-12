@@ -1,5 +1,6 @@
 import argparse
 import sys
+from typing import List
 
 from snape.cli._parser import parser, subcommands
 from snape.util import log
@@ -10,7 +11,7 @@ __all__ = [
 
 
 def snape_help(
-        cmd: list[str]
+        cmd: List[str]
 ) -> None:
     """
     Print out help on snape.

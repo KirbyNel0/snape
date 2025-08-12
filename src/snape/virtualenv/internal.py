@@ -2,7 +2,7 @@ import os
 import shutil
 import venv as python_venv
 from pathlib import Path
-from typing import cast, Generator
+from typing import cast, Generator, Union, Optional, List
 
 from snape import env_var
 from snape.annotations import VirtualEnv, SnapeCancel
@@ -36,7 +36,7 @@ def is_global_snape_env_path(env: Path, check_exists: bool = True) -> bool:
     return env_var.SNAPE_ROOT_PATH in absolute_path(env).parents and ((not check_exists) or env.is_dir())
 
 
-def is_global_snape_env(env: VirtualEnv | Path) -> bool:
+def is_global_snape_env(env: Union[VirtualEnv, Path]) -> bool:
     """
     Checks whether the specified environment path is located at the global snape venv directory and is a valid venv.
 
@@ -46,7 +46,7 @@ def is_global_snape_env(env: VirtualEnv | Path) -> bool:
     return is_global_snape_env_path(env) and is_virtual_env(env)
 
 
-def get_snape_env_path(name: str | None, local: bool, warn_argument_conflicts: bool = True) -> Path:
+def get_snape_env_path(name: Optional[str], local: bool, warn_argument_conflicts: bool = True) -> Path:
     """
     Creates an absolute path pointing to a local or global snape environment with the specified name.
 
@@ -77,7 +77,7 @@ def get_snape_env_path(name: str | None, local: bool, warn_argument_conflicts: b
     return absolute_path(env_var.SNAPE_ROOT_PATH / name)
 
 
-def get_snape_env_name(_env: str | Path | VirtualEnv) -> str | None:
+def get_snape_env_name(_env: Union[str, Path, VirtualEnv]) -> Optional[str]:
     """
     Evaluates the snape-recognized name of a virtual environment.
     The name is all path components from snape's root directory separated by slashes.
@@ -108,7 +108,7 @@ def get_snape_env_name(_env: str | Path | VirtualEnv) -> str | None:
     return _env.name if _env.name == env_var.SNAPE_VENV else None
 
 
-def create_new_snape_env(env: Path, overwrite: bool | None, autoupdate: bool, prompt: str | None = None, env_name: str = None) -> VirtualEnv | None:
+def create_new_snape_env(env: Path, overwrite: Optional[bool], autoupdate: bool, prompt: Optional[str] = None, env_name: Optional[str] = None) -> Optional[VirtualEnv]:
     """
     Creates a new snape environment at the specified path. If the directory exists and is not a venv, an error is
     raised.
@@ -180,7 +180,7 @@ def delete_snape_env(env: VirtualEnv, do_ask: bool, ignore_active: bool) -> None
     info(f"Deleted {locality} snape environment", env_name)
 
 
-def get_local_snape_envs(cwd: Path | None = None) -> list[VirtualEnv]:
+def get_local_snape_envs(cwd: Optional[Path] = None) -> List[VirtualEnv]:
     """
     Creates a list of all environments having the name ``env_var.SNAPE_VENV`` located inside parent directories of
     ``cwd``. The first of these environments would be activated when calling the ``snape`` function.
@@ -191,7 +191,7 @@ def get_local_snape_envs(cwd: Path | None = None) -> list[VirtualEnv]:
     return list(iter_local_snape_envs(cwd))
 
 
-def get_local_snape_env(cwd: Path | None = None) -> VirtualEnv | None:
+def get_local_snape_env(cwd: Optional[Path] = None) -> Optional[VirtualEnv]:
     """
     Evaluates the local snape environment which would be activated when calling ``snape``.
     Almost the same as ``get_local_snape_envs()[0]``.
@@ -205,7 +205,7 @@ def get_local_snape_env(cwd: Path | None = None) -> VirtualEnv | None:
     return result
 
 
-def iter_local_snape_envs(cwd: Path | None = None) -> Generator[VirtualEnv, None, None]:
+def iter_local_snape_envs(cwd: Optional[Path] = None) -> Generator[VirtualEnv, None, None]:
     """
     Iterates all parent directories of ``cwd`` (including ``cwd`` itself) and checks whether a snape-managed venv
     exists inside of that directory. If so, the path to that environment is yielded.
@@ -221,7 +221,7 @@ def iter_local_snape_envs(cwd: Path | None = None) -> Generator[VirtualEnv, None
         local_env_dir = local_env_dir.parent
 
 
-def get_global_snape_envs() -> list[VirtualEnv]:
+def get_global_snape_envs() -> List[VirtualEnv]:
     """
     Creates a list of all virtual environment existing in snape's global scope.
 
@@ -230,7 +230,7 @@ def get_global_snape_envs() -> list[VirtualEnv]:
     return _get_environments(env_var.SNAPE_ROOT_PATH)
 
 
-def _get_environments(root: Path) -> list[VirtualEnv]:
+def _get_environments(root: Path) -> List[VirtualEnv]:
     """
     Lists all environments found inside `root` and its nested directories (recursively).
 

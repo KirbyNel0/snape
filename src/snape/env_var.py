@@ -10,13 +10,13 @@ Example:
 
 import os
 from pathlib import Path
-from typing import Final
+from typing import Final, Optional, List, Dict
 
 from snape.util import absolute_path
 
 # __all__ not listed to not conflict with the __getattr__
 
-__VARS__: Final[dict[str, str | None]] = {
+__VARS__: Final[Dict[str, Optional[str]]] = {
     # Select the current shell as default.
     # This can be changed via command line option and is applied in ``snape.cli.main``.
     "SHELL": os.getenv("SHELL").split("/")[-1] if os.getenv("SHELL") is not None else None,
@@ -40,13 +40,13 @@ def __getattr__(name):
     return globals()[name]
 
 
-def list_vars() -> list[str]:
+def list_vars() -> List[str]:
     return list(__VARS__.keys())
 
 
 # Apply environment variables
 
-SNAPE_ROOT_PATH: Final[Path | None] = absolute_path(__VARS__["SNAPE_ROOT"]) \
+SNAPE_ROOT_PATH: Final[Optional[Path]] = absolute_path(__VARS__["SNAPE_ROOT"]) \
     if __VARS__["SNAPE_ROOT"] is not None else None
 "The directory of all global snape environments. If this is not a directory, the script will throw an error."
 

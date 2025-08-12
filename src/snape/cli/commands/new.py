@@ -1,6 +1,7 @@
 import argparse
-import typing
 from pathlib import Path
+from typing import cast, Optional, List
+
 import snape.env_var
 from snape.annotations import VirtualEnv
 from snape.cli._parser import subcommands
@@ -14,13 +15,13 @@ __all__ = [
 
 
 def snape_new(
-        env: str | None,
+        env: Optional[str],
         do_update: bool,
-        requirements: str | None,
+        requirements: Optional[str],
         requirements_quiet: bool,
-        overwrite: bool | None,
-        prompt: str | None,
-        packages: list[str] | None,
+        overwrite: Optional[bool],
+        prompt: Optional[str],
+        packages: Optional[List[str]],
         install_snape: bool
 ) -> None:
     """
@@ -55,7 +56,7 @@ def snape_new(
             install_requirements(new_env, requirements_path, no_output=requirements_quiet)
         elif is_requirements_env:
             # Must be a venv from here on
-            requirements_env = typing.cast(VirtualEnv, requirements_path)
+            requirements_env = cast(VirtualEnv, requirements_path)
             packages = get_env_packages(requirements_env)
             if len(packages) == 0:
                 info(f"Note: No additional packages were installed in {requirements_path}")

@@ -1,3 +1,5 @@
+from typing import Optional
+
 __all__ = [
     "info",
     "log",
@@ -47,7 +49,7 @@ def log(*message, **kwargs) -> None:
         print("\033[33m+", *message, "\033[0m", **kwargs)
 
 
-def ask(prompt: str, default: bool | None) -> bool:
+def ask(prompt: str, default: Optional[bool]) -> bool:
     """
     Prompts the user to enter either yes (``y``/``Y``) or no (``n``/``N``).
     If a default is specified, no input will result into that output.

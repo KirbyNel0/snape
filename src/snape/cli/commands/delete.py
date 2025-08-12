@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path
+from typing import List
 
 from snape.annotations import SnapeCancel
 from snape.cli._parser import subcommands
@@ -13,11 +14,11 @@ __all__ = [
 
 
 def snape_delete(
-        envs: list[str],
+        envs: List[str],
         error_not_exists: bool,
         do_ask: bool,
         ignore_active: bool
-) -> list[Path]:
+) -> List[Path]:
     """
     Delete a existing global or local snape environments.
 

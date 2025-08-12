@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path
+from typing import Optional
 
 from snape import env_var
 from snape.annotations import SnapeCancel
@@ -17,14 +18,14 @@ def snape_attach(
         *,
         env: str,
         here: bool,
-        global_name: str | None,
+        global_name: Optional[str],
         ignore_active: bool,
         do_ask: bool,
         do_update: bool,
         overwrite: bool,
         delete_old: bool,
         requirements_quiet: bool
-) -> Path | None:
+) -> Optional[Path]:
     """
     Make an arbitrary virtual environment available to snape by copying its dependencies into a new environment
     which is then managed by snape.

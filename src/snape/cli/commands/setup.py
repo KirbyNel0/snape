@@ -1,6 +1,7 @@
 import argparse
 import shutil
 from pathlib import Path
+from typing import List
 
 from snape import env_var
 from snape.annotations import SnapeCancel
@@ -81,7 +82,7 @@ snape_setup_init_parser.set_defaults(func=snape_setup_init)
 
 
 def snape_setup_remove(
-        argv: list[str]
+        argv: List[str]
 ) -> None:
     """
     Undo snape initialization.
