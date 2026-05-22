@@ -23,7 +23,7 @@ if test -z "$SNAPE_VENV"; then
 fi
 
 export _SNAPE_SCRIPT=$(realpath "$(dirname "${BASH_SOURCE[0]}")/../src/snape/__main__.py")
-export _SNAPE_SCRIPT_CMD="help --help -h new touch delete rm env setup status possess attach detach clean exec"
+export _SNAPE_SCRIPT_CMD="help --help -h new touch delete rm env setup status possess attach detach clean exec upgrade freeze"
 
 _find_snape_venv() {
 	RESULT="$(realpath "$(pwd)")"

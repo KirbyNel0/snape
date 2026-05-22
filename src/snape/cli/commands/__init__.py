@@ -4,11 +4,13 @@ from .delete import snape_delete
 from .detach import snape_detach
 from .env import snape_env
 from .execute import snape_exec
+from .freeze import snape_freeze
 from .help import snape_help
 from .env import snape_env
 from .new import snape_new
 from .setup import snape_setup_init, snape_setup_remove
 from .status import snape_status
+from .upgrade import snape_upgrade
 
 __all__ = [
     "snape_attach",
@@ -17,9 +19,11 @@ __all__ = [
     "snape_detach",
     "snape_env",
     "snape_exec",
+    "snape_freeze",
     "snape_help",
     "snape_new",
     "snape_setup_init",
     "snape_setup_remove",
-    "snape_status"
+    "snape_status",
+    "snape_upgrade",
 ]

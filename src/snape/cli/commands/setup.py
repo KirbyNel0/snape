@@ -20,11 +20,15 @@ def snape_setup() -> None:
     snape_setup_parser.print_help()
 
 
-snape_setup_parser = subcommands.add_parser(
-    "setup",
-    description="Manage the snape installation.",
-    help="manage the snape installation"
-)
+if 'site-packages' in __file__:
+    # if not running from the repository, do not create the setup subcommand
+    snape_setup_parser = argparse.ArgumentParser("_")
+else:
+    snape_setup_parser = subcommands.add_parser(
+        "setup",
+        description="Manage the snape installation.",
+        help="manage the snape installation"
+    )
 snape_setup_subcommands = snape_setup_parser.add_subparsers(title="commands", help=None, required=False)
 snape_setup_parser.set_defaults(func=snape_setup)
 
